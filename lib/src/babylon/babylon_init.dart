@@ -1,12 +1,5 @@
-import "dart:async";
+import "dart:html";
 
 import "package:LoaderLib/Loader.dart";
 
-bool _scriptInit = false;
-
-Future<Null> loadScript() async {
-    if (!_scriptInit) {
-        _scriptInit = true;
-        await Loader.loadJavaScript("package:CubeLib/js/babylon.custom.js");
-    }
-}
+Future<ScriptElement> loadScript() => Loader.loadJavaScript("package:CubeLib/js/babylon.js");
