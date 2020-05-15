@@ -7040,6 +7040,66 @@ class ThinEngine {
 	/// Gets host document
 	/// @returns the host document object
 	external HTML.Document getHostDocument();
+	
+	/// Sets alpha constants used by some alpha blending modes
+	/// @param r defines the red component
+	/// @param g defines the green component
+	/// @param b defines the blue component
+	/// @param a defines the alpha component
+	external void setAlphaConstants(num r, num g, num b, num a);
+	
+	/// Sets the current alpha mode
+	/// @param mode defines the mode to use (one of the Engine.ALPHA_XXX)
+	/// @param noDepthWriteChange defines if depth writing state should remains unchanged (false by default)
+	/// @see http://doc.babylonjs.com/resources/transparency_and_how_meshes_are_rendered
+	external void setAlphaMode(num mode, [bool noDepthWriteChange]);
+	
+	/// Gets the current alpha mode
+	/// @see http://doc.babylonjs.com/resources/transparency_and_how_meshes_are_rendered
+	/// @returns the current alpha mode
+	external num getAlphaMode();
+	
+	/// Sets the current alpha equation
+	/// @param equation defines the equation to use (one of the Engine.ALPHA_EQUATION_XXX)
+	external void setAlphaEquation(num equation);
+	
+	/// Gets the current alpha equation.
+	/// @returns the current alpha equation
+	external num getAlphaEquation();
+	
+	/// Unbind a list of render target textures from the webGL context
+	/// This is used only when drawBuffer extension or webGL2 are active
+	/// @param textures defines the render target textures to unbind
+	/// @param disableGenerateMipMaps defines a boolean indicating that mipmaps must not be generated
+	/// @param onBeforeUnbind defines a function which will be called before the effective unbind
+	external void unBindMultiColorAttachmentFramebuffer(List<InternalTexture> textures, bool disableGenerateMipMaps, [void Function() onBeforeUnbind]);
+	
+	/// Create a multi render target texture
+	/// @see http://doc.babylonjs.com/features/webgl2#multiple-render-target
+	/// @param size defines the size of the texture
+	/// @param options defines the creation options
+	/// @returns the cube texture as an InternalTexture
+	external List<InternalTexture> createMultipleRenderTarget(dynamic size, IMultiRenderTargetOptions options);
+	
+	/// Update the sample count for a given multiple render target texture
+	/// @see http://doc.babylonjs.com/features/webgl2#multisample-render-targets
+	/// @param textures defines the textures to update
+	/// @param samples defines the sample count to set
+	/// @returns the effective sample count (could be 0 if multisample render targets are not supported)
+	external num updateMultipleRenderTargetTextureSampleCount(List<InternalTexture> textures, num samples);
+	
+	/// Create a cube texture from prefiltered data (ie. the mipmaps contain ready to use data for PBR reflection)
+	/// @param rootUrl defines the url where the file to load is located
+	/// @param scene defines the current scene
+	/// @param lodScale defines scale to apply to the mip map selection
+	/// @param lodOffset defines offset to apply to the mip map selection
+	/// @param onLoad defines an optional callback raised when the texture is loaded
+	/// @param onError defines an optional callback raised if there is an issue to load the texture
+	/// @param format defines the format of the data
+	/// @param forcedExtension defines the extension to use to pick the right loader
+	/// @param createPolynomials defines wheter or not to create polynomails harmonics for the texture
+	/// @returns the cube texture as an InternalTexture
+	external InternalTexture createPrefilteredCubeTexture(String rootUrl, Scene scene, num lodScale, num lodOffset, [void Function(InternalTexture internalTexture) onLoad, void Function([String message, dynamic exception]) onError, num format, dynamic forcedExtension, bool createPolynomials]);
 }
 
 /// Uniform buffer objects.
@@ -10336,6 +10396,182 @@ class Scene extends AbstractScene implements IAnimatable {
 	/// @param predicate If not null, it will be used to specifiy if a material has to be marked as dirty
 	external void markAllMaterialsAsDirty(num flag, [bool Function(Material mat) predicate]);
 	
+	/// The main sound track played by the scene.
+	/// It cotains your primary collection of sounds.
+	external SoundTrack get mainSoundTrack;
+	external set mainSoundTrack(SoundTrack value);
+	
+	/// The list of sound tracks added to the scene
+	/// @see http://doc.babylonjs.com/how_to/playing_sounds_and_music
+	external List<SoundTrack> get soundTracks;
+	external set soundTracks(List<SoundTrack> value);
+	
+	/// Gets a sound using a given name
+	/// @param name defines the name to search for
+	/// @return the found sound or null if not found at all.
+	external Sound getSoundByName(String name);
+	
+	/// Gets or sets if audio support is enabled
+	/// @see http://doc.babylonjs.com/how_to/playing_sounds_and_music
+	external bool get audioEnabled;
+	external set audioEnabled(bool value);
+	
+	/// Gets or sets if audio will be output to headphones
+	/// @see http://doc.babylonjs.com/how_to/playing_sounds_and_music
+	external bool get headphone;
+	external set headphone(bool value);
+	
+	/// Gets or sets custom audio listener position provider
+	/// @see http://doc.babylonjs.com/how_to/playing_sounds_and_music
+	external Vector3 Function() get audioListenerPositionProvider;
+	external set audioListenerPositionProvider(Vector3 Function() value);
+	
+	/// Gets or sets a refresh rate when using 3D audio positioning
+	external num get audioPositioningRefreshRate;
+	external set audioPositioningRefreshRate(num value);
+	
+	/// Gets the gamepad manager associated with the scene
+	/// @see http://doc.babylonjs.com/how_to/how_to_use_gamepads
+	external GamepadManager get gamepadManager;
+	external set gamepadManager(GamepadManager value);
+	
+	/// Gets the octree used to boost mesh selection (picking)
+	/// @see http://doc.babylonjs.com/how_to/optimizing_your_scene_with_octrees
+	external Octree<AbstractMesh> get selectionOctree;
+	external set selectionOctree(Octree<AbstractMesh> value);
+	
+	/// Creates or updates the octree used to boost selection (picking)
+	/// @see http://doc.babylonjs.com/how_to/optimizing_your_scene_with_octrees
+	/// @param maxCapacity defines the maximum capacity per leaf
+	/// @param maxDepth defines the maximum depth of the octree
+	/// @returns an octree of AbstractMesh
+	external Octree<AbstractMesh> createOrUpdateSelectionOctree([num maxCapacity, num maxDepth]);
+	
+	/// Gets the debug layer (aka Inspector) associated with the scene
+	/// @see http://doc.babylonjs.com/features/playground_debuglayer
+	external DebugLayer get debugLayer;
+	external set debugLayer(DebugLayer value);
+	
+	/// Creates a default light for the scene.
+	/// @see http://doc.babylonjs.com/How_To/Fast_Build#create-default-light
+	/// @param replace has the default false, when true replaces the existing lights in the scene with a hemispheric light
+	external void createDefaultLight([bool replace]);
+	
+	/// Creates a default camera for the scene.
+	/// @see http://doc.babylonjs.com/How_To/Fast_Build#create-default-camera
+	/// @param createArcRotateCamera has the default false which creates a free camera, when true creates an arc rotate camera
+	/// @param replace has default false, when true replaces the active camera in the scene
+	/// @param attachCameraControls has default false, when true attaches camera controls to the canvas.
+	external void createDefaultCamera([bool createArcRotateCamera, bool replace, bool attachCameraControls]);
+	
+	/// Creates a default camera and a default light.
+	/// @see http://doc.babylonjs.com/how_to/Fast_Build#create-default-camera-or-light
+	/// @param createArcRotateCamera has the default false which creates a free camera, when true creates an arc rotate camera
+	/// @param replace has the default false, when true replaces the active camera/light in the scene
+	/// @param attachCameraControls has the default false, when true attaches camera controls to the canvas.
+	external void createDefaultCameraOrLight([bool createArcRotateCamera, bool replace, bool attachCameraControls]);
+	
+	/// Creates a new sky box
+	/// @see http://doc.babylonjs.com/how_to/Fast_Build#create-default-skybox
+	/// @param environmentTexture defines the texture to use as environment texture
+	/// @param pbr has default false which requires the StandardMaterial to be used, when true PBRMaterial must be used
+	/// @param scale defines the overall scale of the skybox
+	/// @param blur is only available when pbr is true, default is 0, no blur, maximum value is 1
+	/// @param setGlobalEnvTexture has default true indicating that scene.environmentTexture must match the current skybox texture
+	/// @returns a new mesh holding the sky box
+	external Mesh createDefaultSkybox([BaseTexture environmentTexture, bool pbr, num scale, num blur, bool setGlobalEnvTexture]);
+	
+	/// Creates a new environment
+	/// @see http://doc.babylonjs.com/How_To/Fast_Build#create-default-environment
+	/// @param options defines the options you can use to configure the environment
+	/// @returns the new EnvironmentHelper
+	external EnvironmentHelper createDefaultEnvironment([IEnvironmentHelperOptions options]);
+	
+	/// Creates a new VREXperienceHelper
+	/// @see http://doc.babylonjs.com/how_to/webvr_helper
+	/// @param webVROptions defines the options used to create the new VREXperienceHelper
+	/// @returns a new VREXperienceHelper
+	external VRExperienceHelper createDefaultVRExperience([VRExperienceHelperOptions webVROptions]);
+	
+	/// Creates a new WebXRDefaultExperience
+	/// @see http://doc.babylonjs.com/how_to/webxr
+	/// @param options experience options
+	/// @returns a promise for a new WebXRDefaultExperience
+	external Promise<WebXRDefaultExperience> createDefaultXRExperienceAsync(WebXRDefaultExperienceOptions options);
+	
+	/// Gets or sets the simplification queue attached to the scene
+	/// @see http://doc.babylonjs.com/how_to/in-browser_mesh_simplification
+	external SimplificationQueue get simplificationQueue;
+	external set simplificationQueue(SimplificationQueue value);
+	
+	/// Gets the current physics engine
+	/// @returns a IPhysicsEngine or null if none attached
+	external IPhysicsEngine getPhysicsEngine();
+	
+	/// Enables physics to the current scene
+	/// @param gravity defines the scene's gravity for the physics engine
+	/// @param plugin defines the physics engine to be used. defaults to OimoJS.
+	/// @return a boolean indicating if the physics engine was initialized
+	external bool enablePhysics(Vector3 gravity, [IPhysicsEnginePlugin plugin]);
+	
+	/// Disables and disposes the physics engine associated with the scene
+	external void disablePhysicsEngine();
+	
+	/// Gets a boolean indicating if there is an active physics engine
+	/// @returns a boolean indicating if there is an active physics engine
+	external bool isPhysicsEnabled();
+	
+	/// Deletes a physics compound impostor
+	/// @param compound defines the compound to delete
+	external void deleteCompoundImpostor(dynamic compound);
+	
+	/// An event triggered when physic simulation is about to be run
+	external Observable<Scene> get onBeforePhysicsObservable;
+	external set onBeforePhysicsObservable(Observable<Scene> value);
+	
+	/// An event triggered when physic simulation has been done
+	external Observable<Scene> get onAfterPhysicsObservable;
+	external set onAfterPhysicsObservable(Observable<Scene> value);
+	
+	/// Gets or Sets the current geometry buffer associated to the scene.
+	external GeometryBufferRenderer get geometryBufferRenderer;
+	external set geometryBufferRenderer(GeometryBufferRenderer value);
+	
+	/// Enables a GeometryBufferRender and associates it with the scene
+	/// @param ratio defines the scaling ratio to apply to the renderer (1 by default which means same resolution)
+	/// @returns the GeometryBufferRenderer
+	external GeometryBufferRenderer enableGeometryBufferRenderer([num ratio]);
+	
+	/// Disables the GeometryBufferRender associated with the scene
+	external void disableGeometryBufferRenderer();
+	
+	/// Gets the postprocess render pipeline manager
+	/// @see http://doc.babylonjs.com/how_to/how_to_use_postprocessrenderpipeline
+	/// @see http://doc.babylonjs.com/how_to/using_default_rendering_pipeline
+	external PostProcessRenderPipelineManager get postProcessRenderPipelineManager;
+	
+	/// Gets or sets a boolean indicating if all bounding boxes must be rendered
+	external bool get forceShowBoundingBoxes;
+	external set forceShowBoundingBoxes(bool value);
+	
+	/// Gets the bounding box renderer associated with the scene
+	/// @returns a BoundingBoxRenderer
+	external BoundingBoxRenderer getBoundingBoxRenderer();
+	
+	/// Creates a depth renderer a given camera which contains a depth map which can be used for post processing.
+	/// @param camera The camera to create the depth renderer on (default: scene's active camera)
+	/// @param storeNonLinearDepth Defines whether the depth is stored linearly like in Babylon Shadows or directly like glFragCoord.z
+	/// @returns the created depth renderer
+	external DepthRenderer enableDepthRenderer([Camera camera, bool storeNonLinearDepth]);
+	
+	/// Disables a depth renderer for a given camera
+	/// @param camera The camera to disable the depth renderer on (default: scene's active camera)
+	external void disableDepthRenderer([Camera camera]);
+	
+	/// Gets the outline renderer associated with the scene
+	/// @returns a OutlineRenderer
+	external OutlineRenderer getOutlineRenderer();
+	
 	/// Array of animations
 	external List<Animation> get animations;
 	external set animations(List<Animation> value);
@@ -11725,6 +11961,113 @@ class Engine extends ThinEngine {
 	/// Sets the current loading screen background color
 	/// @see http://doc.babylonjs.com/how_to/creating_a_custom_loading_screen
 	external set loadingUIBackgroundColor(String value);
+	
+	/// Create a new webGL query (you must be sure that queries are supported by checking getCaps() function)
+	/// @return the new query
+	external WebGL.Query createQuery();
+	
+	/// Delete and release a webGL query
+	/// @param query defines the query to delete
+	/// @return the current engine
+	external Engine deleteQuery(WebGL.Query query);
+	
+	/// Check if a given query has resolved and got its value
+	/// @param query defines the query to check
+	/// @returns true if the query got its value
+	external bool isQueryResultAvailable(WebGL.Query query);
+	
+	/// Gets the value of a given query
+	/// @param query defines the query to check
+	/// @returns the value of the query
+	external num getQueryResult(WebGL.Query query);
+	
+	/// Initiates an occlusion query
+	/// @param algorithmType defines the algorithm to use
+	/// @param query defines the query to use
+	/// @returns the current engine
+	/// @see http://doc.babylonjs.com/features/occlusionquery
+	external Engine beginOcclusionQuery(num algorithmType, WebGL.Query query);
+	
+	/// Ends an occlusion query
+	/// @see http://doc.babylonjs.com/features/occlusionquery
+	/// @param algorithmType defines the algorithm to use
+	/// @returns the current engine
+	external Engine endOcclusionQuery(num algorithmType);
+	
+	/// Starts a time query (used to measure time spent by the GPU on a specific frame)
+	/// Please note that only one query can be issued at a time
+	/// @returns a time token used to track the time span
+	external dynamic startTimeQuery();
+	
+	/// Ends a time query
+	/// @param token defines the token used to measure the time span
+	/// @returns the time spent (in ns)
+	external dynamic endTimeQuery(dynamic token);
+	
+	/// Creates a webGL transform feedback object
+	/// Please makes sure to check webGLVersion property to check if you are running webGL 2+
+	/// @returns the webGL transform feedback object
+	external WebGL.TransformFeedback createTransformFeedback();
+	
+	/// Delete a webGL transform feedback object
+	/// @param value defines the webGL transform feedback object to delete
+	external void deleteTransformFeedback(WebGL.TransformFeedback value);
+	
+	/// Bind a webGL transform feedback object to the webgl context
+	/// @param value defines the webGL transform feedback object to bind
+	external void bindTransformFeedback(WebGL.TransformFeedback value);
+	
+	/// Begins a transform feedback operation
+	/// @param usePoints defines if points or triangles must be used
+	external void beginTransformFeedback(bool usePoints);
+	
+	/// Ends a transform feedback operation
+	external void endTransformFeedback();
+	
+	/// Specify the varyings to use with transform feedback
+	/// @param program defines the associated webGL program
+	/// @param value defines the list of strings representing the varying names
+	external void setTranformFeedbackVaryings(WebGL.Program program, List<String> value);
+	
+	/// Bind a webGL buffer for a transform feedback operation
+	/// @param value defines the webGL buffer to bind
+	external void bindTransformFeedbackBuffer(DataBuffer value);
+	
+	/// Gets or sets the  HTML element to use for attaching events
+	external HTML.Element get inputElement;
+	external set inputElement(HTML.Element value);
+	
+	/// Gets the current engine view
+	/// @see https://doc.babylonjs.com/how_to/multi_canvases
+	external EngineView get activeView;
+	external set activeView(EngineView value);
+	
+	/// Gets or sets the list of views
+	external List<EngineView> get views;
+	external set views(List<EngineView> value);
+	
+	/// Register a new child canvas
+	/// @param canvas defines the canvas to register
+	/// @param camera defines an optional camera to use with this canvas (it will overwrite the scene.camera for this view)
+	/// @returns the associated view
+	external EngineView registerView(HTML.CanvasElement canvas, [Camera camera]);
+	
+	/// Remove a registered child canvas
+	/// @param canvas defines the canvas to remove
+	/// @returns the current engine
+	external Engine unRegisterView(HTML.CanvasElement canvas);
+	
+	/// Create an effect to use with particle systems.
+	/// Please note that some parameters like animation sheets or not being billboard are not supported in this configuration
+	/// @param fragmentName defines the base name of the effect (The name of file without .fragment.fx)
+	/// @param uniformsNames defines a list of attribute names
+	/// @param samplers defines an array of string used to represent textures
+	/// @param defines defines the string containing the defines to use to compile the shaders
+	/// @param fallbacks defines the list of potential fallbacks to use if shader conmpilation fails
+	/// @param onCompiled defines a function to call when the effect creation is successful
+	/// @param onError defines a function to call when the effect creation has failed
+	/// @returns the new Effect
+	external Effect createEffectForParticles(String fragmentName, List<String> uniformsNames, List<String> samplers, String defines, [EffectFallbacks fallbacks, void Function(Effect effect) onCompiled, void Function(Effect effect, String errors) onError]);
 }
 
 /// Raw texture can help creating a texture directly from an array of data.
@@ -11941,6 +12284,77 @@ abstract class AbstractScene {
 	
 	/// @returns all meshes, lights, cameras, transformNodes and bones
 	external List<Node> getNodes();
+	
+	/// The list of sounds used in the scene.
+	external List<Sound> get sounds;
+	external set sounds(List<Sound> value);
+	
+	/// The list of effect layers (highlights/glow) added to the scene
+	/// @see http://doc.babylonjs.com/how_to/highlight_layer
+	/// @see http://doc.babylonjs.com/how_to/glow_layer
+	external List<EffectLayer> get effectLayers;
+	external set effectLayers(List<EffectLayer> value);
+	
+	/// Removes the given effect layer from this scene.
+	/// @param toRemove defines the effect layer to remove
+	/// @returns the index of the removed effect layer
+	external num removeEffectLayer(EffectLayer toRemove);
+	
+	/// Adds the given effect layer to this scene
+	/// @param newEffectLayer defines the effect layer to add
+	external void addEffectLayer(EffectLayer newEffectLayer);
+	
+	/// Return a the first highlight layer of the scene with a given name.
+	/// @param name The name of the highlight layer to look for.
+	/// @return The highlight layer if found otherwise null.
+	external GlowLayer getGlowLayerByName(String name);
+	
+	/// Return a the first highlight layer of the scene with a given name.
+	/// @param name The name of the highlight layer to look for.
+	/// @return The highlight layer if found otherwise null.
+	external HighlightLayer getHighlightLayerByName(String name);
+	
+	/// The list of layers (background and foreground) of the scene
+	external List<Layer> get layers;
+	external set layers(List<Layer> value);
+	
+	/// The list of lens flare system added to the scene
+	/// @see http://doc.babylonjs.com/how_to/how_to_use_lens_flares
+	external List<LensFlareSystem> get lensFlareSystems;
+	external set lensFlareSystems(List<LensFlareSystem> value);
+	
+	/// Removes the given lens flare system from this scene.
+	/// @param toRemove The lens flare system to remove
+	/// @returns The index of the removed lens flare system
+	external num removeLensFlareSystem(LensFlareSystem toRemove);
+	
+	/// Adds the given lens flare system to this scene
+	/// @param newLensFlareSystem The lens flare system to add
+	external void addLensFlareSystem(LensFlareSystem newLensFlareSystem);
+	
+	/// Gets a lens flare system using its name
+	/// @param name defines the name to look for
+	/// @returns the lens flare system or null if not found
+	external LensFlareSystem getLensFlareSystemByName(String name);
+	
+	/// Gets a lens flare system using its id
+	/// @param id defines the id to look for
+	/// @returns the lens flare system or null if not found
+	external LensFlareSystem getLensFlareSystemByID(String id);
+	
+	/// The list of reflection probes added to the scene
+	/// @see http://doc.babylonjs.com/how_to/how_to_use_reflection_probes
+	external List<ReflectionProbe> get reflectionProbes;
+	external set reflectionProbes(List<ReflectionProbe> value);
+	
+	/// Removes the given reflection probe from this scene.
+	/// @param toRemove The reflection probe to remove
+	/// @returns The index of the removed reflection probe
+	external num removeReflectionProbe(ReflectionProbe toRemove);
+	
+	/// Adds the given reflection probe to this scene.
+	/// @param newReflectionProbe The reflection probe to add
+	external void addReflectionProbe(ReflectionProbe newReflectionProbe);
 }
 
 /// Defines the Procedural Texture scene component responsible to manage any Procedural Texture
@@ -14987,6 +15401,15 @@ class Bone extends Node {
 	/// @param mesh The mesh that this bone is attached to
 	/// @param result The vector3 that the local position should be copied to
 	external void getLocalPositionFromAbsoluteToRef(Vector3 position, AbstractMesh mesh, Vector3 result);
+	
+	/// Copy an animation range from another bone
+	/// @param source defines the source bone
+	/// @param rangeName defines the range name to copy
+	/// @param frameOffset defines the frame offset
+	/// @param rescaleAsRequired defines if rescaling must be applied if required
+	/// @param skelDimensionsRatio defines the scaling ratio
+	/// @returns true if operation was successful
+	external bool copyAnimationRange(Bone source, String rangeName, num frameOffset, bool rescaleAsRequired, Vector3 skelDimensionsRatio);
 }
 
 /// Defines a runtime animation
@@ -16482,6 +16905,23 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData {
 	
 	/// @hidden
 	external void removeInstance(InstancedMesh instance);
+	
+	/// Simplify the mesh according to the given array of settings.
+	/// Function will return immediately and will simplify async
+	/// @param settings a collection of simplification settings
+	/// @param parallelProcessing should all levels calculate parallel or one after the other
+	/// @param simplificationType the type of simplification to run
+	/// @param successCallback optional success callback to be called after the simplification finished processing all settings
+	/// @returns the current mesh
+	external Mesh simplify(List<ISimplificationSettings> settings, [bool parallelProcessing, int simplificationType, void Function([Mesh mesh, num submeshIndex]) successCallback]);
+	
+	/// Returns an array populated with IParticleSystem objects whose the mesh is the emitter
+	/// @returns an array of IParticleSystem
+	external List<IParticleSystem> getEmittedParticleSystems();
+	
+	/// Returns an array populated with IParticleSystem objects whose the mesh or its children are the emitter
+	/// @returns an array of IParticleSystem
+	external List<IParticleSystem> getHierarchyEmittedParticleSystems();
 }
 
 /// Class used to store all common mesh properties
@@ -17183,6 +17623,86 @@ class AbstractMesh extends TransformNode implements IDisposable, ICullable, IGet
 	/// @returns the currentAbstractMesh
 	/// @see https://www.babylonjs-playground.com/#19O9TU#0
 	external AbstractMesh enableEdgesRendering([num epsilon, bool checkVerticesInsteadOfIndices]);
+	
+	/// This function will create an octree to help to select the right submeshes for rendering, picking and collision computations.
+	/// Please note that you must have a decent number of submeshes to get performance improvements when using an octree
+	/// @param maxCapacity defines the maximum size of each block (64 by default)
+	/// @param maxDepth defines the maximum depth to use (no more than 2 levels by default)
+	/// @returns the new octree
+	/// @see https://www.babylonjs-playground.com/#NA4OQ#12
+	/// @see http://doc.babylonjs.com/how_to/optimizing_your_scene_with_octrees
+	external Octree<SubMesh> createOrUpdateSubmeshesOctree([num maxCapacity, num maxDepth]);
+	
+	/// This number indicates the number of allowed retries before stop the occlusion query, this is useful if the occlusion query is taking long time before to the query result is retireved, the query result indicates if the object is visible within the scene or not and based on that Babylon.Js engine decideds to show or hide the object.
+	/// The default value is -1 which means don't break the query and wait till the result
+	/// @see http://doc.babylonjs.com/features/occlusionquery
+	external num get occlusionRetryCount;
+	external set occlusionRetryCount(num value);
+	
+	/// This property is responsible for starting the occlusion query within the Mesh or not, this property is also used to determine what should happen when the occlusionRetryCount is reached. It has supports 3 values:
+	/// * OCCLUSION_TYPE_NONE (Default Value): this option means no occlusion query whith the Mesh.
+	/// * OCCLUSION_TYPE_OPTIMISTIC: this option is means use occlusion query and if occlusionRetryCount is reached and the query is broken show the mesh.
+	/// * OCCLUSION_TYPE_STRICT: this option is means use occlusion query and if occlusionRetryCount is reached and the query is broken restore the last state of the mesh occlusion if the mesh was visible then show the mesh if was hidden then hide don't show.
+	/// @see http://doc.babylonjs.com/features/occlusionquery
+	external num get occlusionType;
+	external set occlusionType(num value);
+	
+	/// This property determines the type of occlusion query algorithm to run in WebGl, you can use:
+	/// * AbstractMesh.OCCLUSION_ALGORITHM_TYPE_ACCURATE which is mapped to GL_ANY_SAMPLES_PASSED.
+	/// * AbstractMesh.OCCLUSION_ALGORITHM_TYPE_CONSERVATIVE (Default Value) which is mapped to GL_ANY_SAMPLES_PASSED_CONSERVATIVE which is a false positive algorithm that is faster than GL_ANY_SAMPLES_PASSED but less accurate.
+	/// @see http://doc.babylonjs.com/features/occlusionquery
+	external num get occlusionQueryAlgorithmType;
+	external set occlusionQueryAlgorithmType(num value);
+	
+	/// Gets or sets whether the mesh is occluded or not, it is used also to set the intial state of the mesh to be occluded or not
+	/// @see http://doc.babylonjs.com/features/occlusionquery
+	external bool get isOccluded;
+	external set isOccluded(bool value);
+	
+	/// Flag to check the progress status of the query
+	/// @see http://doc.babylonjs.com/features/occlusionquery
+	external bool get isOcclusionQueryInProgress;
+	external set isOcclusionQueryInProgress(bool value);
+	
+	/// Gets or sets impostor used for physic simulation
+	/// @see http://doc.babylonjs.com/features/physics_engine
+	external PhysicsImpostor get physicsImpostor;
+	external set physicsImpostor(PhysicsImpostor value);
+	
+	/// Gets the current physics impostor
+	/// @see http://doc.babylonjs.com/features/physics_engine
+	/// @returns a physics impostor or null
+	external PhysicsImpostor getPhysicsImpostor();
+	
+	/// Apply a physic impulse to the mesh
+	/// @param force defines the force to apply
+	/// @param contactPoint defines where to apply the force
+	/// @returns the current mesh
+	/// @see http://doc.babylonjs.com/how_to/using_the_physics_engine
+	external AbstractMesh applyImpulse(Vector3 force, Vector3 contactPoint);
+	
+	/// Creates a physic joint between two meshes
+	/// @param otherMesh defines the other mesh to use
+	/// @param pivot1 defines the pivot to use on this mesh
+	/// @param pivot2 defines the pivot to use on the other mesh
+	/// @param options defines additional options (can be plugin dependent)
+	/// @returns the current mesh
+	/// @see https://www.babylonjs-playground.com/#0BS5U0#0
+	external AbstractMesh setPhysicsLinkWith(Mesh otherMesh, Vector3 pivot1, Vector3 pivot2, [dynamic options]);
+	
+	/// Gets or sets a boolean indicating if the bounding box must be rendered as well (false by default)
+	external bool get showBoundingBox;
+	external set showBoundingBox(bool value);
+	
+	/// Gets or sets a boolean indicating if the outline must be rendered as well
+	/// @see https://www.babylonjs-playground.com/#10WJ5S#3
+	external bool get renderOutline;
+	external set renderOutline(bool value);
+	
+	/// Gets or sets a boolean indicating if the overlay must be rendered as well
+	/// @see https://www.babylonjs-playground.com/#10WJ5S#2
+	external bool get renderOverlay;
+	external set renderOverlay(bool value);
 }
 
 /// Defines the options associated with the creation of a shader material.
@@ -17554,6 +18074,15 @@ class LinesMesh extends Mesh {
 	/// @returns a new InstancedLinesMesh
 	@override
 	external InstancedLinesMesh createInstance(String name);
+	
+	/// Enables the edge rendering mode on the mesh.
+	/// This mode makes the mesh edges visible
+	/// @param epsilon defines the maximal distance between two angles to detect a face
+	/// @param checkVerticesInsteadOfIndices indicates that we should check vertex list directly instead of faces
+	/// @returns the currentAbstractMesh
+	/// @see https://www.babylonjs-playground.com/#19O9TU#0
+	@override
+	external AbstractMesh enableEdgesRendering([num epsilon, bool checkVerticesInsteadOfIndices]);
 }
 
 /// Creates an instance based on a source LinesMesh
@@ -17571,6 +18100,15 @@ class InstancedLinesMesh extends InstancedMesh {
 	/// Returns the string "InstancedLinesMesh".
 	@override
 	external String getClassName();
+	
+	/// Enables the edge rendering mode on the mesh.
+	/// This mode makes the mesh edges visible
+	/// @param epsilon defines the maximal distance between two angles to detect a face
+	/// @param checkVerticesInsteadOfIndices indicates that we should check vertex list directly instead of faces
+	/// @returns the current InstancedLinesMesh
+	/// @see https://www.babylonjs-playground.com/#19O9TU#0
+	@override
+	external InstancedLinesMesh enableEdgesRendering([num epsilon, bool checkVerticesInsteadOfIndices]);
 }
 
 /* var */
@@ -19578,6 +20116,18 @@ class FreeCameraInputsManager extends CameraInputsManager<FreeCamera> {
 	/// Remove all attached input methods from a camera
 	@override
 	external void clear();
+	
+	/// Add orientation input support to the input manager.
+	/// @returns the current input manager
+	external FreeCameraInputsManager addDeviceOrientation();
+	
+	/// Add virtual joystick input support to the input manager.
+	/// @returns the current input manager
+	external FreeCameraInputsManager addVirtualJoystick();
+	
+	/// Adds gamepad input support to the FreeCameraInputsManager.
+	/// @returns the FreeCameraInputsManager
+	external FreeCameraInputsManager addGamepad();
 }
 
 /// This represents a free type of camera. It can be useful in First Person Shooter game for instance.
@@ -27111,6 +27661,12 @@ class BaseTexture implements IAnimatable {
 	/// @param textures Define the list of textures to wait for
 	/// @param callback Define the callback triggered once the entire list will be ready
 	external static void WhenAllReady(List<BaseTexture> textures, void Function() callback);
+	
+	/// Get the polynomial representation of the texture data.
+	/// This is mainly use as a fast way to recover IBL Diffuse irradiance data.
+	/// @see https://learnopengl.com/PBR/IBL/Diffuse-irradiance
+	external SphericalPolynomial get sphericalPolynomial;
+	external set sphericalPolynomial(SphericalPolynomial value);
 }
 
 /// Options to be used when creating an effect.
@@ -30927,6 +31483,14 @@ class ArcRotateCameraInputsManager extends CameraInputsManager<ArcRotateCamera> 
 	/// Add keyboard input support to the input manager.
 	/// @returns the current input manager
 	external ArcRotateCameraInputsManager addKeyboard();
+	
+	/// Add orientation input support to the input manager.
+	/// @returns the current input manager
+	external ArcRotateCameraInputsManager addVRDeviceOrientation();
+	
+	/// Adds gamepad input support to the ArcRotateCamera InputManager.
+	/// @returns the camera inputs manager
+	external ArcRotateCameraInputsManager addGamepad();
 }
 
 /// This represents an orbital type of camera.
@@ -37258,6 +37822,7 @@ class NullEngine extends Engine {
 	/// @param mode defines the mode to use (one of the Engine.ALPHA_XXX)
 	/// @param noDepthWriteChange defines if depth writing state should remains unchanged (false by default)
 	/// @see http://doc.babylonjs.com/resources/transparency_and_how_meshes_are_rendered
+	@override
 	external void setAlphaMode(num mode, [bool noDepthWriteChange]);
 	
 	/// Bind webGl buffers directly to the webGL context
@@ -37964,17 +38529,20 @@ class NativeEngine extends Engine {
 	/// @param g defines the green component
 	/// @param b defines the blue component
 	/// @param a defines the alpha component
+	@override
 	external void setAlphaConstants(num r, num g, num b, num a);
 	
 	/// Sets the current alpha mode
 	/// @param mode defines the mode to use (one of the BABYLON.Constants.ALPHA_XXX)
 	/// @param noDepthWriteChange defines if depth writing state should remains unchanged (false by default)
 	/// @see http://doc.babylonjs.com/resources/transparency_and_how_meshes_are_rendered
+	@override
 	external void setAlphaMode(num mode, [bool noDepthWriteChange]);
 	
 	/// Gets the current alpha mode
 	/// @see http://doc.babylonjs.com/resources/transparency_and_how_meshes_are_rendered
 	/// @returns the current alpha mode
+	@override
 	external num getAlphaMode();
 	
 	@override
