@@ -6,6 +6,8 @@ import "dart:math" as Math;
 //import "package:CommonLib/utility.dart";
 import "package:CubeLib/babylon.dart" as B;
 
+Element debugDiv = querySelector("#debugdiv");
+
 Future<Null> main() async {
     //await BABYLON.loadScript();
 
@@ -16,8 +18,8 @@ Future<Null> main() async {
 
     B.Camera camera = new B.ArcRotateCamera("Camera", Math.pi/2, Math.pi/2, 10, new B.Vector3(0,0,0), scene);
     camera
-        ..minZ = 0.2
-        ..maxZ = 200.0
+        //..minZ = 0.2
+        //..maxZ = 200.0
         ..attachControl(canvas, true);
 
     B.Texture depth = scene.enableDepthRenderer(camera).getDepthMap();
@@ -51,16 +53,35 @@ Future<Null> main() async {
         }
     }
 
-    B.PostProcess postTest = new B.PostProcess("post test", "./posttest", <String>["screenSize", "highlightThreshold"], <String>["depthSampler"], 1.0, camera);
+    B.PostProcess postTest = new B.PostProcess("post test", "./posttest", <String>["screenSize", "projection", "view", "invProjView"], <String>["depthSampler"], 1.0, camera);
+
+    B.Matrix invProjMatrix = new B.Matrix();
 
     postTest.onApply = JS.allowInterop((B.Effect effect, [dynamic a]) {
         effect.setTexture("depthSampler", depth);
         effect.setFloat2("screenSize", postTest.width, postTest.height);
-        effect.setFloat("highlightThreshold", 0.90);
+
+        effect.setMatrix("projection", camera.getProjectionMatrix());
+        effect.setMatrix("view", camera.getViewMatrix());
+
+        camera.getWorldMatrix().multiplyToRef(camera.getProjectionMatrix(), invProjMatrix);
+        invProjMatrix.multiplyToRef(camera.getViewMatrix(), invProjMatrix);
+        invProjMatrix.invert();
+        effect.setMatrix("invProjView", invProjMatrix);
+
+        debugDiv.text = printMatrix(camera.getWorldMatrix());
     });
 
     engine.runRenderLoop(JS.allowInterop((){
         scene.render();
     }));
+}
+
+String printMatrix(B.Matrix m) {
+    B.Vector4 r0 = m.getRow(0);
+    B.Vector4 r1 = m.getRow(1);
+    B.Vector4 r2 = m.getRow(2);
+    B.Vector4 r3 = m.getRow(3);
+    return "[${r0.x}, ${r0.y}, ${r0.z}, ${r0.w}] [${r1.x}, ${r1.y}, ${r1.z}, ${r1.w}] [${r2.x}, ${r2.y}, ${r2.z}, ${r2.w}] [${r3.x}, ${r3.y}, ${r3.z}, ${r3.w}]";
 }
 

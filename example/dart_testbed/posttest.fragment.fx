@@ -9,9 +9,12 @@ uniform sampler2D depthSampler;
 
 // Parameters
 uniform vec2 screenSize;
-uniform float highlightThreshold;
+uniform mat4 projection;
+uniform mat4 view;
+uniform mat4 invProjView;
 
 struct DepthInfo {
+    float depth;
     vec2 dir;
     float mag;
 };
@@ -41,6 +44,39 @@ vec2 colourVariance(vec2 coord, vec2 dim) {
     return total * 0.25;
 }
 
+vec3 worldPos(float depth) {
+    /*float z = depth * 2.0 - 1.0;
+
+    vec4 clipSpacePosition = vec4(vUV * 2.0 - 1.0, z, 1.0);
+    vec4 viewSpacePosition = inverse(projection) * clipSpacePosition;
+
+    // Perspective division
+    viewSpacePosition /= viewSpacePosition.w;
+
+    vec4 worldSpacePosition = inverse(view) * viewSpacePosition;
+
+    return worldSpacePosition.xyz;*/
+
+    vec4 H = vec4(vUV * 2.0 - 1.0, depth, 1.0);
+    vec4 D = invProjView * H; //inverse(projection * view) * H; //
+    return (D / D.w).xyz;
+}
+
+bool checker3d(vec3 position) {
+    float size = 0.5;
+    vec3 v = floor(position / size);
+
+    return mod(v.x + v.y + v.z, 2.0) < 0.000001;
+}
+
+vec3 worldColour(vec3 position) {
+    float size = 0.5;
+
+    vec3 pos = fract(position * size);
+
+    return pos;
+}
+
 DepthInfo depthVariance(vec2 coord, vec2 dim) {
     float middle = texture2D(depthSampler, coord).r;
     vec2 dir = vec2(0.0);
@@ -63,7 +99,7 @@ DepthInfo depthVariance(vec2 coord, vec2 dim) {
     dir += clamp(d, 0.0,1.0) * vec2( 0.0,  1.0);
     mag += d;
 
-    return DepthInfo(dir * 0.25, mag * 0.25);
+    return DepthInfo(middle, dir * 0.25, mag * 0.25);
 }
 
 void main(void)
@@ -86,6 +122,17 @@ void main(void)
         gl_FragColor.rgb *= 0.5;
         gl_FragColor.r += 0.75;
     }
+
+    vec3 world = worldPos(depth.depth);
+
+    /*if (checker3d(world)) {
+        gl_FragColor.rgb *= 0.5;
+    }*/
+    if (depth.depth < 1.0) {
+        gl_FragColor.rgb *= worldColour(world);
+        //gl_FragColor = vec4(depth.depth, depth.depth, depth.depth, 1.0);
+    }
+
     //gl_FragColor = vec4(depthMag,depthMag,depthMag,1);
     /*gl_FragColor = vec4(0,0,0,1);
     if (depthMag > depthThreshold) {

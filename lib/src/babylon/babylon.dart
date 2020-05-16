@@ -1502,7 +1502,7 @@ abstract class IMatrixLike {
 	external Float32List toArray();
 	
 	external dynamic get updateFlag;
-	external set updateFlag(dynamic value);
+	external set updateFlag(num value);
 }
 
 /// @hidden
@@ -3492,7 +3492,7 @@ class Quaternion {
 
 /// Class used to store matrix data (4x4)
 @JS()
-class Matrix {
+class Matrix implements IMatrixLike {
 	
 	/// Creates an empty matrix (filled with zeros)
 	external factory Matrix();
