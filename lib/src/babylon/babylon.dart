@@ -28008,7 +28008,7 @@ class Effect implements IDisposable {
 	/// @param uniformName Name of the variable.
 	/// @param vector3 Value to be set.
 	/// @returns this effect.
-	external Effect setVector3(String uniformName, IVector3Like vector3);
+	external Effect setVector3(String uniformName, Vector3 vector3);
 	
 	/// Sets a float3 on a uniform variable.
 	/// @param uniformName Name of the variable.
