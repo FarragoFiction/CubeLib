@@ -19,8 +19,8 @@ Future<Null> main() async {
 
     B.Camera camera = new B.ArcRotateCamera("Camera", Math.pi/2, Math.pi/2, 10, new B.Vector3(0,0,0), scene);
     camera
-        ..minZ = 2.0
-        ..maxZ = 200.0
+        //..minZ = 2.0
+        ..maxZ = 500.0
         ..attachControl(canvas, true);
 
     B.Texture depth = scene.enableDepthRenderer(camera, false).getDepthMap();
@@ -54,71 +54,24 @@ Future<Null> main() async {
         }
     }
 
-    B.Mesh testplane = B.MeshBuilder.CreatePlane("testplane", B.MeshBuilderCreatePlaneOptions(size: 2), scene)
+    /*B.Mesh testplane = B.MeshBuilder.CreatePlane("testplane", B.MeshBuilderCreatePlaneOptions(size: 2), scene)
         ..position.set(0, 0, -5)
         ..rotation.x = Math.pi
-    ;
+    ;*/
 
-    B.PostProcess postTest = new B.PostProcess("post test", "./posttest", <String>["screenSize", "invProjView", "cameraPos", "nearZ", "farZ"], <String>["depthSampler"], 1.0, camera);
+    B.PostProcess postTest = new B.PostProcess("post test", "./posttest", <String>["screenSize", "invProjView", "nearZ", "farZ"], <String>["depthSampler"], 1.0, camera);
 
-    B.Matrix invProjMatrix = new B.Matrix();
     B.Matrix invTransform = new B.Matrix();
-
-    B.Vector3 testPos = new B.Vector3(-1, -1, -5);
-    B.Matrix testProjMatrix = new B.Matrix();
-    B.Matrix testViewportMatrix = new B.Matrix();
 
     postTest.onApply = JS.allowInterop((B.Effect effect, [dynamic a]) {
         effect.setTexture("depthSampler", depth);
         effect.setFloat2("screenSize", postTest.width, postTest.height);
 
-        camera.getViewMatrix().multiplyToRef(camera.getProjectionMatrix(), invProjMatrix);
         scene.getTransformMatrix().invertToRef(invTransform);
-        invProjMatrix.invert();
         effect.setMatrix("invProjView", invTransform);
 
-        effect.setVector3("cameraPos", camera.position);
         effect.setFloat("nearZ", camera.minZ);
         effect.setFloat("farZ", camera.maxZ);
-
-        // --------------------
-
-        B.Matrix.FromValuesToRef(
-            0.5, 0, 0, 0,
-            0, -0.5, 0, 0,
-            0, 0, 0.5, 0,
-            0.5, 0.5, 0.5, 1,
-            testViewportMatrix);
-
-        scene.getTransformMatrix().multiplyToRef(testViewportMatrix, testProjMatrix);
-        B.Vector3 screen = B.Vector3.TransformCoordinates(testPos, testProjMatrix);
-
-        B.Vector3 proj = B.Vector3.Project(testPos, B.Matrix.Identity(), scene.getTransformMatrix(), camera.viewport);
-
-        // --------------------
-
-        B.Vector3 unprojSource = proj;//new B.Vector3(0.5591305613517761, 0.5788407484690348, 0.9334266901016235);
-
-
-        B.Matrix um = new B.Matrix();
-        camera.getViewMatrix().multiplyToRef(camera.getProjectionMatrix(), um);
-        um.invert();
-        B.Vector3 screenSource = new B.Vector3(
-            unprojSource.x * 2.0 - 1.0,
-            -(unprojSource.y * 2.0 - 1.0),
-            unprojSource.z * 2.0 - 1.0
-        );
-        B.Vector3 unprojResult = new B.Vector3();
-        B.Vector3.TransformCoordinatesToRef(screenSource, um, unprojResult);
-        Float32List vals = um.asArray();
-        double n = screenSource.x * vals[3] + screenSource.y * vals[7] + screenSource.z * vals[11] + vals[15];
-        if (B.Scalar.WithinEpsilon(n, 1.0)) {
-            unprojResult.scaleInPlace(1.0 / n);
-        }
-
-        B.Vector3 unproj = B.Vector3.Unproject(unprojSource, 1, 1, B.Matrix.Identity(), camera.getViewMatrix(), camera.getProjectionMatrix());
-
-        debugDiv.text = "project: ${proj.x}, ${proj.y}, ${proj.z} | manual: ${screen.x}, ${screen.y} | viewport x,y,w,h: ${camera.viewport.x}, ${camera.viewport.y}, ${camera.viewport.width}, ${camera.viewport.height} | unproject: ${unproj.x}, ${unproj.y}, ${unproj.z} | manual unproject: ${unprojResult.x}, ${unprojResult.y}, ${unprojResult.z} | camera minZ/maxZ/ pos: ${camera.minZ}, ${camera.maxZ}, ${camera.position.x} | invViewProj: ${printMatrix(invProjMatrix)} | inverse Transform: ${printMatrix(invTransform)}";
     });
 
     engine.runRenderLoop(JS.allowInterop((){
