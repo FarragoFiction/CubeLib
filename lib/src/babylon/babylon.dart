@@ -1407,137 +1407,6 @@ class ShaderProcessor {
 	external static void Process(String sourceCode, ProcessingOptions options, void Function(String migratedCode) callback);
 }
 
-/// @hidden
-@JS()
-@anonymous
-class IColor4Like {
-	
-	external factory IColor4Like({dynamic r, dynamic g, dynamic b, dynamic a});
-	
-	external dynamic get r;
-	external set r( dynamic value );
-	
-	external dynamic get g;
-	external set g( dynamic value );
-	
-	external dynamic get b;
-	external set b( dynamic value );
-	
-	external dynamic get a;
-	external set a( dynamic value );
-}
-
-/// @hidden
-@JS()
-@anonymous
-class IColor3Like {
-	
-	external factory IColor3Like({dynamic r, dynamic g, dynamic b});
-	
-	external dynamic get r;
-	external set r( dynamic value );
-	
-	external dynamic get g;
-	external set g( dynamic value );
-	
-	external dynamic get b;
-	external set b( dynamic value );
-}
-
-/// @hidden
-@JS()
-@anonymous
-class IVector4Like {
-	
-	external factory IVector4Like({dynamic x, dynamic y, dynamic z, dynamic w});
-	
-	external dynamic get x;
-	external set x( dynamic value );
-	
-	external dynamic get y;
-	external set y( dynamic value );
-	
-	external dynamic get z;
-	external set z( dynamic value );
-	
-	external dynamic get w;
-	external set w( dynamic value );
-}
-
-/// @hidden
-@JS()
-@anonymous
-class IVector3Like {
-	
-	external factory IVector3Like({dynamic x, dynamic y, dynamic z});
-	
-	external dynamic get x;
-	external set x( dynamic value );
-	
-	external dynamic get y;
-	external set y( dynamic value );
-	
-	external dynamic get z;
-	external set z( dynamic value );
-}
-
-/// @hidden
-@JS()
-@anonymous
-class IVector2Like {
-	
-	external factory IVector2Like({dynamic x, dynamic y});
-	
-	external dynamic get x;
-	external set x( dynamic value );
-	
-	external dynamic get y;
-	external set y( dynamic value );
-}
-
-/// @hidden
-@JS()
-abstract class IMatrixLike {
-	
-	external Float32List toArray();
-	
-	external dynamic get updateFlag;
-	external set updateFlag(num value);
-}
-
-/// @hidden
-@JS()
-@anonymous
-class IViewportLike {
-	
-	external factory IViewportLike({dynamic x, dynamic y, dynamic width, dynamic height});
-	
-	external dynamic get x;
-	external set x( dynamic value );
-	
-	external dynamic get y;
-	external set y( dynamic value );
-	
-	external dynamic get width;
-	external set width( dynamic value );
-	
-	external dynamic get height;
-	external set height( dynamic value );
-}
-
-/// @hidden
-@JS()
-abstract class IPlaneLike {
-	
-	external IVector3Like get normal;
-	external set normal(IVector3Like value);
-	
-	external dynamic get d;
-	external set d(dynamic value);
-	
-	external void normalize();
-}
-
 /// Interface used to define common properties for effect fallbacks
 @JS()
 abstract class IEffectFallbacks {
@@ -3492,7 +3361,7 @@ class Quaternion {
 
 /// Class used to store matrix data (4x4)
 @JS()
-class Matrix implements IMatrixLike {
+class Matrix {
 	
 	/// Creates an empty matrix (filled with zeros)
 	external factory Matrix();
@@ -4124,12 +3993,12 @@ class Matrix implements IMatrixLike {
 	/// Computes a reflection matrix from a plane
 	/// @param plane defines the reflection plane
 	/// @returns a new matrix
-	external static Matrix Reflection(IPlaneLike plane);
+	external static Matrix Reflection(Plane plane);
 	
 	/// Computes a reflection matrix from a plane
 	/// @param plane defines the reflection plane
 	/// @param result defines the target matrix
-	external static void ReflectionToRef(IPlaneLike plane, Matrix result);
+	external static void ReflectionToRef(Plane plane, Matrix result);
 	
 	/// Sets the given matrix as a rotation matrix composed from the 3 left handed axes
 	/// @param xaxis defines the value of the 1st axis
@@ -6428,7 +6297,7 @@ class ThinEngine {
 	external String get textureFormatInUse;
 	
 	/// Gets the current viewport
-	external IViewportLike get currentViewport;
+	external Viewport get currentViewport;
 	
 	/// Gets the default empty texture
 	external InternalTexture get emptyTexture;
@@ -6521,13 +6390,13 @@ class ThinEngine {
 	/// @param backBuffer defines if the back buffer must be cleared
 	/// @param depth defines if the depth buffer must be cleared
 	/// @param stencil defines if the stencil buffer must be cleared
-	external void clear(IColor4Like color, bool backBuffer, bool depth, [bool stencil]);
+	external void clear(Color4 color, bool backBuffer, bool depth, [bool stencil]);
 	
 	/// Set the WebGL's viewport
 	/// @param viewport defines the viewport element to be used
 	/// @param requiredWidth defines the width required for rendering. If not provided the rendering canvas' width is used
 	/// @param requiredHeight defines the height required for rendering. If not provided the rendering canvas' height is used
-	external void setViewport(IViewportLike viewport, [num requiredWidth, num requiredHeight]);
+	external void setViewport(Viewport viewport, [num requiredWidth, num requiredHeight]);
 	
 	/// Begin a new frame
 	external void beginFrame();
@@ -11794,7 +11663,7 @@ class Engine extends ThinEngine {
 	/// @param width defines the width of the viewport (in screen space)
 	/// @param height defines the height of the viewport (in screen space)
 	/// @return the current viewport Object (if any) that is being replaced by this call. You can restore this viewport later on to go back to the original state
-	external IViewportLike setDirectViewport(num x, num y, num width, num height);
+	external Viewport setDirectViewport(num x, num y, num width, num height);
 	
 	/// Executes a scissor clear (ie. a clear on a specific portion of the screen)
 	/// @param x defines the x-coordinate of the top left corner of the clear rectangle
@@ -11802,7 +11671,7 @@ class Engine extends ThinEngine {
 	/// @param width defines the width of the clear rectangle
 	/// @param height defines the height of the clear rectangle
 	/// @param clearColor defines the clear color
-	external void scissorClear(num x, num y, num width, num height, IColor4Like clearColor);
+	external void scissorClear(num x, num y, num width, num height, Color4 clearColor);
 	
 	/// Enable scissor test on a specific rectangle (ie. render will only be executed on a specific portion of the screen)
 	/// @param x defines the x-coordinate of the top left corner of the clear rectangle
@@ -27965,7 +27834,7 @@ class Effect implements IDisposable {
 	/// @param uniformName Name of the variable.
 	/// @param matrix matrix to be set.
 	/// @returns this effect.
-	external Effect setMatrix(String uniformName, IMatrixLike matrix);
+	external Effect setMatrix(String uniformName, Matrix matrix);
 	
 	/// Sets a 3x3 matrix on a uniform variable. (Speicified as [1,2,3,4,5,6,7,8,9] will result in [1,2,3][4,5,6][7,8,9] matrix)
 	/// @param uniformName Name of the variable.
@@ -27995,7 +27864,7 @@ class Effect implements IDisposable {
 	/// @param uniformName Name of the variable.
 	/// @param vector2 vector2 to be set.
 	/// @returns this effect.
-	external Effect setVector2(String uniformName, IVector2Like vector2);
+	external Effect setVector2(String uniformName, Vector2 vector2);
 	
 	/// Sets a float2 on a uniform variable.
 	/// @param uniformName Name of the variable.
@@ -28022,7 +27891,7 @@ class Effect implements IDisposable {
 	/// @param uniformName Name of the variable.
 	/// @param vector4 Value to be set.
 	/// @returns this effect.
-	external Effect setVector4(String uniformName, IVector4Like vector4);
+	external Effect setVector4(String uniformName, Vector4 vector4);
 	
 	/// Sets a float4 on a uniform variable.
 	/// @param uniformName Name of the variable.
@@ -28037,20 +27906,20 @@ class Effect implements IDisposable {
 	/// @param uniformName Name of the variable.
 	/// @param color3 Value to be set.
 	/// @returns this effect.
-	external Effect setColor3(String uniformName, IColor3Like color3);
+	external Effect setColor3(String uniformName, Color3 color3);
 	
 	/// Sets a Color4 on a uniform variable.
 	/// @param uniformName Name of the variable.
 	/// @param color3 Value to be set.
 	/// @param alpha Alpha value to be set.
 	/// @returns this effect.
-	external Effect setColor4(String uniformName, IColor3Like color3, num alpha);
+	external Effect setColor4(String uniformName, Color3 color3, num alpha);
 	
 	/// Sets a Color4 on a uniform variable
 	/// @param uniformName defines the name of the variable
 	/// @param color4 defines the value to be set
 	/// @returns this effect.
-	external Effect setDirectColor4(String uniformName, IColor4Like color4);
+	external Effect setDirectColor4(String uniformName, Color4 color4);
 	
 	/// Release all associated resources
 	@override
@@ -29372,11 +29241,11 @@ class IDisplayChangedEventArgs {
 @anonymous
 class IViewportOwnerLike {
 	
-	external factory IViewportOwnerLike({IViewportLike viewport});
+	external factory IViewportOwnerLike({Viewport viewport});
 	
 	/// Gets or sets the viewport
-	external IViewportLike get viewport;
-	external set viewport( IViewportLike value );
+	external Viewport get viewport;
+	external set viewport( Viewport value );
 }
 
 /// The engine store class is responsible to hold all the instances of Engine and Scene created
@@ -29496,7 +29365,7 @@ class Tools {
 	/// @param height defines the height of the source data
 	/// @param pixels defines the source byte array
 	/// @param color defines the output color
-	external static void FetchToRef(num u, num v, num width, num height, Uint8List pixels, IColor4Like color);
+	external static void FetchToRef(num u, num v, num width, num height, Uint8List pixels, Color4 color);
 	
 	/// Interpolates between a and b via alpha
 	/// @param a The lower value (returned when alpha = 0)
@@ -37641,7 +37510,7 @@ class NullEngine extends Engine {
 	/// @param depth defines if the depth buffer must be cleared
 	/// @param stencil defines if the stencil buffer must be cleared
 	@override
-	external void clear(IColor4Like color, bool backBuffer, bool depth, [bool stencil]);
+	external void clear(Color4 color, bool backBuffer, bool depth, [bool stencil]);
 	
 	/// Gets the current render width
 	/// @param useScreen defines if screen size must be used (or the current render target if any)
@@ -37660,7 +37529,7 @@ class NullEngine extends Engine {
 	/// @param requiredWidth defines the width required for rendering. If not provided the rendering canvas' width is used
 	/// @param requiredHeight defines the height required for rendering. If not provided the rendering canvas' height is used
 	@override
-	external void setViewport(IViewportLike viewport, [num requiredWidth, num requiredHeight]);
+	external void setViewport(Viewport viewport, [num requiredWidth, num requiredHeight]);
 	
 	@override
 	external WebGL.Program createShaderProgram(IPipelineContext pipelineContext, String vertexCode, String fragmentCode, String defines, [WebGL.RenderingContext context, List<String> transformFeedbackVaryings]);
@@ -38422,7 +38291,7 @@ class NativeEngine extends Engine {
 	external HTML.Document getHostDocument();
 	
 	@override
-	external void clear(IColor4Like color, bool backBuffer, bool depth, [bool stencil]);
+	external void clear(Color4 color, bool backBuffer, bool depth, [bool stencil]);
 	
 	@override
 	external NativeDataBuffer createIndexBuffer(dynamic indices, [bool updatable]);
@@ -38484,7 +38353,7 @@ class NativeEngine extends Engine {
 	external num getRenderHeight([bool useScreen]);
 	
 	@override
-	external void setViewport(IViewportLike viewport, [num requiredWidth, num requiredHeight]);
+	external void setViewport(Viewport viewport, [num requiredWidth, num requiredHeight]);
 	
 	@override
 	external void setState(bool culling, [num zOffset, bool force, bool reverseSide]);
