@@ -1741,6 +1741,10 @@ class Vector2 {
 	external num get y;
 	external set y(num value);
 	
+	/// Gets a string with the Vector2 coordinates
+	/// @returns a string with the Vector2 coordinates
+	external String toString();
+	
 	/// Gets class name
 	/// @returns the string "Vector2"
 	external String getClassName();
@@ -2068,6 +2072,10 @@ class Vector3 {
 	/// Defines the third coordinates (on Z axis)
 	external num get z;
 	external set z(num value);
+	
+	/// Creates a string representation of the Vector3
+	/// @returns a string with the Vector3 coordinates.
+	external String toString();
 	
 	/// Gets the class name
 	/// @returns the string "Vector3"
@@ -2700,6 +2708,10 @@ class Vector4 {
 	external num get w;
 	external set w(num value);
 	
+	/// Returns the string with the Vector4 coordinates.
+	/// @returns a string containing all the vector values
+	external String toString();
+	
 	/// Returns the string "Vector4".
 	/// @returns "Vector4"
 	external String getClassName();
@@ -3058,6 +3070,10 @@ class Quaternion {
 	/// defines the fourth component (1.0 by default)
 	external num get w;
 	external set w(num value);
+	
+	/// Gets a string representation for the current quaternion
+	/// @returns a string with the Quaternion coordinates
+	external String toString();
 	
 	/// Gets the class name of the quaternion
 	/// @returns the string "Quaternion"
@@ -4646,6 +4662,10 @@ class Color3 {
 	external num get b;
 	external set b(num value);
 	
+	/// Creates a string with the Color3 current values
+	/// @returns the string representation of the Color3 object
+	external String toString();
+	
 	/// Returns the string "Color3"
 	/// @returns "Color3"
 	external String getClassName();
@@ -4979,6 +4999,10 @@ class Color4 {
 	/// @param result defines the Color4 to fill the result in
 	/// @returns the result Color4
 	external Color4 multiplyToRef(Color4 color, Color4 result);
+	
+	/// Creates a string with the Color4 current values
+	/// @returns the string representation of the Color4 object
+	external String toString();
 	
 	/// Returns the string "Color4"
 	/// @returns "Color4"
@@ -7434,6 +7458,10 @@ class MaterialDefines {
 	
 	/// Resets the material define values
 	external void reset();
+	
+	/// Converts the material define values to a string
+	/// @returns - String of material define information
+	external String toString();
 }
 
 /// The color grading curves provide additional color adjustmnent that is applied after any color grading transform (3D LUT).
@@ -10943,6 +10971,10 @@ class Size implements ISize {
 	external num get height;
 	@override
 	external set height(num value);
+	
+	/// Returns a string with the Size width and height
+	/// @returns a string with the Size width and height
+	external String toString();
 	
 	/// "Size"
 	/// @returns the string "Size"
@@ -15566,6 +15598,11 @@ class Skeleton implements IAnimatable {
 	/// @returns a scene object
 	external Scene getScene();
 	
+	/// Gets a string representing the current skeleton data
+	/// @param fullDetails defines a boolean indicating if we want a verbose version
+	/// @returns a string representing the current skeleton data
+	external String toString([bool fullDetails]);
+	
 	/// Get bone's index searching by name
 	/// @param name defines bone's name to search for
 	/// @return the indice of the bone. Returns -1 if not found
@@ -15961,6 +15998,12 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData {
 	/// @returns the string "Mesh".
 	@override
 	external String getClassName();
+	
+	/// Returns a description of this mesh
+	/// @param fullDetails define if full details about this mesh must be used
+	/// @returns a descriptive string representing this mesh
+	@override
+	external String toString([bool fullDetails]);
 	
 	/// Gets a boolean indicating if this mesh has LOD
 	external bool get hasLODLevels;
@@ -17125,6 +17168,11 @@ class AbstractMesh extends TransformNode implements IDisposable, ICullable, IGet
 	/// @returns "AbstractMesh"
 	@override
 	external String getClassName();
+	
+	/// Gets a string representation of the current mesh
+	/// @param fullDetails defines a boolean indicating if full details must be included
+	/// @returns a string representation of the current mesh
+	external String toString([bool fullDetails]);
 	
 	/// Gets or sets a Vector3 depicting the mesh scaling along each local axis X, Y, Z.  Default is (1.0, 1.0, 1.0)
 	@override
@@ -18900,6 +18948,11 @@ abstract class Light extends Node {
 	/// @returns the class name
 	@override
 	external String getClassName();
+	
+	/// Converts the light information to a readable string for debug purpose.
+	/// @param fullDetails Supports for multiple levels of logging within scene loading
+	/// @returns the human readable light info
+	external String toString([bool fullDetails]);
 	
 	/// Set the enabled state of this node.
 	/// @param value - the new enabled state
@@ -20815,6 +20868,11 @@ class Camera extends Node {
 	@override
 	external String getClassName();
 	
+	/// Gets a string representation of the camera useful for debug purpose.
+	/// @param fullDetails Defines that a more verboe level of logging is required
+	/// @returns the string representation
+	external String toString([bool fullDetails]);
+	
 	/// Gets the current world space position of the camera.
 	external Vector3 get globalPosition;
 	
@@ -22440,6 +22498,11 @@ class Material implements IAnimatable {
 	/// @hidden
 	external dynamic /* object */ get meshMap;
 	external set meshMap(dynamic /* object */ value);
+	
+	/// Returns a string representation of the current material
+	/// @param fullDetails defines a boolean indicating which levels of logging is desired
+	/// @returns a string with material information
+	external String toString([bool fullDetails]);
 	
 	/// Gets the class name of the material
 	/// @returns a string with the class name of the material
@@ -26925,6 +26988,11 @@ class Animation {
 	/// Specifies if any of the runtime animations are currently running
 	external bool get hasRunningRuntimeAnimations;
 	
+	/// Converts the animation to a string
+	/// @param fullDetails support for multiple levels of logging within scene loading
+	/// @returns String form of the animation
+	external String toString([bool fullDetails]);
+	
 	/// Add an event to this animation
 	/// @param event Event to add
 	external void addEvent(AnimationEvent event);
@@ -27403,6 +27471,10 @@ class BaseTexture implements IAnimatable {
 	
 	/// Define the unique id of the texture in the scene.
 	external String get uid;
+	
+	/// Return a string representation of the texture.
+	/// @returns the texture as a string
+	external String toString();
 	
 	/// Get the class name of the texture.
 	/// @returns "BaseTexture"
@@ -30181,6 +30253,11 @@ class AnimationGroup implements IDisposable {
 	/// Returns the string "AnimationGroup"
 	/// @returns "AnimationGroup"
 	external String getClassName();
+	
+	/// Creates a detailled string about the object
+	/// @param fullDetails defines if the output string will support multiple levels of logging within scene loading
+	/// @returns a string representing the object
+	external String toString([bool fullDetails]);
 }
 
 /// Define an interface for all classes that will hold resources
@@ -44852,6 +44929,11 @@ class ReflectionProbe {
 	
 	/// Clean all associated resources
 	external void dispose();
+	
+	/// Converts the reflection probe information to a readable string for debug purpose.
+	/// @param fullDetails Supports for multiple levels of logging within scene loading
+	/// @returns the human readable reflection probe info
+	external String toString([bool fullDetails]);
 	
 	/// Get the class name of the relfection probe.
 	/// @returns "ReflectionProbe"
