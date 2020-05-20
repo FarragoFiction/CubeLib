@@ -1281,7 +1281,7 @@ class RetryStrategy {
 /// @ignore
 /// Application error to support additional information when loading a file
 @JS()
-abstract class BaseError extends Error {
+abstract class BaseError {
 	external factory BaseError();
 }
 
@@ -10594,7 +10594,7 @@ abstract class ISceneSerializableComponent implements ISceneComponent {
 /// Representation of a stage in the scene (Basically a list of ordered steps)
 /// @hidden
 @JS()
-class Stage<T extends Function> extends JsArray<StageObject<T>> {
+class Stage<T extends Function> {
 	
 	/// Hide ctor from the rest of the world.
 	/// @param items The items to add.
