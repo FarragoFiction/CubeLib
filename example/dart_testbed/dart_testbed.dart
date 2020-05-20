@@ -5,7 +5,7 @@ import "dart:math" as Math;
 import "dart:typed_data";
 
 //import "package:CommonLib/utility.dart";
-import "package:CubeLib/babylon.dart" as B;
+import "package:CubeLib/CubeLib.dart" as B;
 
 Element debugDiv = querySelector("#debugdiv");
 
