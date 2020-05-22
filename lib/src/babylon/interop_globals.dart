@@ -12,6 +12,7 @@ import "package:js/js.dart";
 
 import "babylon.dart";
 import "babylon_debug.dart";
+import "babylon_extensions.dart";
 import "interop_globals.dart";
 import "promise.dart";
 

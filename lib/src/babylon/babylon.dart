@@ -11,6 +11,7 @@ import "dart:web_gl" as WebGL;
 import "package:js/js.dart";
 
 import "babylon_debug.dart";
+import "babylon_extensions.dart";
 import "interop_globals.dart";
 import "promise.dart";
 
@@ -17627,7 +17628,7 @@ class AbstractMesh extends TransformNode implements IDisposable, ICullable, IGet
 @anonymous
 class IShaderMaterialOptions {
 	
-	external factory IShaderMaterialOptions({bool needAlphaBlending, bool needAlphaTesting, List<String> attributes, List<String> uniforms, List<String> uniformBuffers, List<String> samplers, List<String> defines, String vertex, String fragment, HTML.Element vertexElement, HTML.Element fragmentElement, String vertexSource, String fragmentSource});
+	external factory IShaderMaterialOptions({bool needAlphaBlending, bool needAlphaTesting, List<String> attributes, List<String> uniforms, List<String> uniformBuffers, List<String> samplers, List<String> defines});
 	
 	/// Does the material work in alpha blend mode
 	external bool get needAlphaBlending;
@@ -17656,30 +17657,6 @@ class IShaderMaterialOptions {
 	/// The list of defines used in the shader
 	external List<String> get defines;
 	external set defines( List<String> value );
-
-    /// Used to index Effect.ShaderStore, "custom" -> Effect.ShaderStore["customVertexShader"]
-    external String get vertex;
-    external set vertex( String value );
-
-    /// Used to index Effect.ShaderStore, "custom" -> Effect.ShaderStore["customFragmentShader"]
-    external String get fragment;
-    external set fragment( String value );
-
-    /// Element to take vertex shader code from
-    external HTML.Element get vertexElement;
-    external set vertexElement( HTML.Element value );
-
-    /// Element to take fragment shader code from
-    external HTML.Element get fragmentElement;
-    external set fragmentElement( HTML.Element value );
-
-    /// Vertex shader source code as a string
-    external String get vertexSource;
-    external set vertexSource( String value );
-
-    /// Fragment shader source code as a string
-    external String get fragmentSource;
-    external set fragmentSource( String value );
 }
 
 /// The ShaderMaterial object has the necessary methods to pass data from your scene to the Vertex and Fragment Shaders and returns a material that can be applied to any mesh.
@@ -18326,30 +18303,6 @@ class ICustomShaderOptions {
 	/// The list of defines used in the shader
 	external List<String> get defines;
 	external set defines( List<String> value );
-
-    /// Used to index Effect.ShaderStore, "custom" -> Effect.ShaderStore["customVertexShader"]
-    external String get vertex;
-    external set vertex( String value );
-
-    /// Used to index Effect.ShaderStore, "custom" -> Effect.ShaderStore["customFragmentShader"]
-    external String get fragment;
-    external set fragment( String value );
-
-    /// Element to take vertex shader code from
-    external HTML.Element get vertexElement;
-    external set vertexElement( HTML.Element value );
-
-    /// Element to take fragment shader code from
-    external HTML.Element get fragmentElement;
-    external set fragmentElement( HTML.Element value );
-
-    /// Vertex shader source code as a string
-    external String get vertexSource;
-    external set vertexSource( String value );
-
-    /// Fragment shader source code as a string
-    external String get fragmentSource;
-    external set fragmentSource( String value );
 }
 
 /// Interface to implement to create a shadow generator compatible with BJS.

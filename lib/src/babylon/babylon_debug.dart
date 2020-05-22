@@ -11,6 +11,7 @@ import "dart:web_gl" as WebGL;
 import "package:js/js.dart";
 
 import "babylon.dart";
+import "babylon_extensions.dart";
 import "interop_globals.dart";
 import "promise.dart";
 
