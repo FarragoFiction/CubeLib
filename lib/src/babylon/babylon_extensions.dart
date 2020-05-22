@@ -17,3 +17,8 @@ class ShaderMaterialShaderPath {
         String vertexSource, String fragmentSource
     });
 }
+
+@JS()
+class ShaderMaterialWithAlphaTestTexture extends ShaderMaterial {
+    external factory ShaderMaterialWithAlphaTestTexture(String name, Scene scene, dynamic shaderPath, [IShaderMaterialOptions options, Texture alphaTexture]);
+}
