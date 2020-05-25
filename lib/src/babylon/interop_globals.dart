@@ -466,6 +466,38 @@ class ThinEngineGetGlInfo {
 
 @JS()
 @anonymous
+class ThinEngineCreateRenderTargetTextureSize {
+	
+	external factory ThinEngineCreateRenderTargetTextureSize({num width, num height, num layers});
+	
+	external num get width;
+	external set width( num value );
+	
+	external num get height;
+	external set height( num value );
+	
+	external num get layers;
+	external set layers( num value );
+}
+
+@JS()
+@anonymous
+class ThinEngineCreateDepthStencilTextureSize {
+	
+	external factory ThinEngineCreateDepthStencilTextureSize({num width, num height, num layers});
+	
+	external num get width;
+	external set width( num value );
+	
+	external num get height;
+	external set height( num value );
+	
+	external num get layers;
+	external set layers( num value );
+}
+
+@JS()
+@anonymous
 class MaterialHelperPrepareDefinesForLightState {
 	
 	external factory MaterialHelperPrepareDefinesForLightState({bool needNormals, bool needRebuild, bool shadowEnabled, bool specularEnabled, bool lightmapMode});

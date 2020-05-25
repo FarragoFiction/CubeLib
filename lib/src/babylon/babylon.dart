@@ -6935,6 +6935,99 @@ class ThinEngine {
 	/// @returns the host document object
 	external HTML.Document getHostDocument();
 	
+	/// Create an uniform buffer
+	/// @see http://doc.babylonjs.com/features/webgl2#uniform-buffer-objets
+	/// @param elements defines the content of the uniform buffer
+	/// @returns the webGL uniform buffer
+	external DataBuffer createUniformBuffer(dynamic elements);
+	
+	/// Create a dynamic uniform buffer
+	/// @see http://doc.babylonjs.com/features/webgl2#uniform-buffer-objets
+	/// @param elements defines the content of the uniform buffer
+	/// @returns the webGL uniform buffer
+	external DataBuffer createDynamicUniformBuffer(dynamic elements);
+	
+	/// Update an existing uniform buffer
+	/// @see http://doc.babylonjs.com/features/webgl2#uniform-buffer-objets
+	/// @param uniformBuffer defines the target uniform buffer
+	/// @param elements defines the content to update
+	/// @param offset defines the offset in the uniform buffer where update should start
+	/// @param count defines the size of the data to update
+	external void updateUniformBuffer(DataBuffer uniformBuffer, dynamic elements, [num offset, num count]);
+	
+	/// Bind an uniform buffer to the current webGL context
+	/// @param buffer defines the buffer to bind
+	external void bindUniformBuffer(DataBuffer buffer);
+	
+	/// Bind a buffer to the current webGL context at a given location
+	/// @param buffer defines the buffer to bind
+	/// @param location defines the index where to bind the buffer
+	external void bindUniformBufferBase(DataBuffer buffer, num location);
+	
+	/// Bind a specific block at a given index in a specific shader program
+	/// @param pipelineContext defines the pipeline context to use
+	/// @param blockName defines the block name
+	/// @param index defines the index where to bind the block
+	external void bindUniformBlock(IPipelineContext pipelineContext, String blockName, num index);
+	
+	/// Creates a cube texture
+	/// @param rootUrl defines the url where the files to load is located
+	/// @param scene defines the current scene
+	/// @param files defines the list of files to load (1 per face)
+	/// @param noMipmap defines a boolean indicating that no mipmaps shall be generated (false by default)
+	/// @param onLoad defines an optional callback raised when the texture is loaded
+	/// @param onError defines an optional callback raised if there is an issue to load the texture
+	/// @param format defines the format of the data
+	/// @param forcedExtension defines the extension to use to pick the right loader
+	/// @param createPolynomials if a polynomial sphere should be created for the cube texture
+	/// @param lodScale defines the scale applied to environment texture. This manages the range of LOD level used for IBL according to the roughness
+	/// @param lodOffset defines the offset applied to environment texture. This manages first LOD level used for IBL according to the roughness
+	/// @param fallback defines texture to use while falling back when (compressed) texture file not found.
+	/// @returns the cube texture as an InternalTexture
+	external InternalTexture createCubeTexture(String rootUrl, Scene scene, List<String> files, bool noMipmap, void Function([dynamic data]) onLoad, void Function([String message, dynamic exception]) onError, num format, dynamic forcedExtension, bool createPolynomials, num lodScale, num lodOffset, InternalTexture fallback);
+	
+	/// Creates a new render target texture
+	/// @param size defines the size of the texture
+	/// @param options defines the options used to create the texture
+	/// @returns a new render target texture stored in an InternalTexture
+	external InternalTexture createRenderTargetTexture(dynamic size, dynamic options);
+	
+	/// Creates a depth stencil texture.
+	/// This is only available in WebGL 2 or with the depth texture extension available.
+	/// @param size The size of face edge in the texture.
+	/// @param options The options defining the texture.
+	/// @returns The texture
+	external InternalTexture createDepthStencilTexture(dynamic size, DepthTextureCreationOptions options);
+	
+	/// Creates a dynamic texture
+	/// @param width defines the width of the texture
+	/// @param height defines the height of the texture
+	/// @param generateMipMaps defines if the engine should generate the mip levels
+	/// @param samplingMode defines the required sampling mode (Texture.NEAREST_SAMPLINGMODE by default)
+	/// @returns the dynamic texture inside an InternalTexture
+	external InternalTexture createDynamicTexture(num width, num height, bool generateMipMaps, num samplingMode);
+	
+	/// Update the content of a dynamic texture
+	/// @param texture defines the texture to update
+	/// @param canvas defines the canvas containing the source
+	/// @param invertY defines if data must be stored with Y axis inverted
+	/// @param premulAlpha defines if alpha is stored as premultiplied
+	/// @param format defines the format of the data
+	/// @param forceBindTexture if the texture should be forced to be bound eg. after a graphics context loss (Default: false)
+	external void updateDynamicTexture(InternalTexture texture, dynamic canvas, bool invertY, [bool premulAlpha, num format, bool forceBindTexture]);
+	
+	/// Creates a new render target cube texture
+	/// @param size defines the size of the texture
+	/// @param options defines the options used to create the texture
+	/// @returns a new render target cube texture stored in an InternalTexture
+	external InternalTexture createRenderTargetCubeTexture(num size, [RenderTargetCreationOptions options]);
+	
+	/// Update a video texture
+	/// @param texture defines the texture to update
+	/// @param video defines the video element to use
+	/// @param invertY defines if data must be stored with Y axis inverted
+	external void updateVideoTexture(InternalTexture texture, HTML.VideoElement video, bool invertY);
+	
 	/// Sets alpha constants used by some alpha blending modes
 	/// @param r defines the red component
 	/// @param g defines the green component
@@ -10294,6 +10387,146 @@ class Scene extends AbstractScene implements IAnimatable {
 	/// @param predicate If not null, it will be used to specifiy if a material has to be marked as dirty
 	external void markAllMaterialsAsDirty(num flag, [bool Function(Material mat) predicate]);
 	
+	/// All of the sprite managers added to this scene
+	/// @see http://doc.babylonjs.com/babylon101/sprites
+	external List<ISpriteManager> get spriteManagers;
+	external set spriteManagers(List<ISpriteManager> value);
+	
+	/// An event triggered when sprites rendering is about to start
+	/// Note: This event can be trigger more than once per frame (because sprites can be rendered by render target textures as well)
+	external Observable<Scene> get onBeforeSpritesRenderingObservable;
+	external set onBeforeSpritesRenderingObservable(Observable<Scene> value);
+	
+	/// An event triggered when sprites rendering is done
+	/// Note: This event can be trigger more than once per frame (because sprites can be rendered by render target textures as well)
+	external Observable<Scene> get onAfterSpritesRenderingObservable;
+	external set onAfterSpritesRenderingObservable(Observable<Scene> value);
+	
+	/// Launch a ray to try to pick a sprite in the scene
+	/// @param x position on screen
+	/// @param y position on screen
+	/// @param predicate Predicate function used to determine eligible sprites. Can be set to null. In this case, a sprite must have isPickable set to true
+	/// @param fastCheck Launch a fast check only using the bounding boxes. Can be set to null.
+	/// @param camera camera to use for computing the picking ray. Can be set to null. In this case, the scene.activeCamera will be used
+	/// @returns a PickingInfo
+	external PickingInfo pickSprite(num x, num y, [bool Function(Sprite sprite) predicate, bool fastCheck, Camera camera]);
+	
+	/// Use the given ray to pick a sprite in the scene
+	/// @param ray The ray (in world space) to use to pick meshes
+	/// @param predicate Predicate function used to determine eligible sprites. Can be set to null. In this case, a sprite must have isPickable set to true
+	/// @param fastCheck Launch a fast check only using the bounding boxes. Can be set to null.
+	/// @param camera camera to use. Can be set to null. In this case, the scene.activeCamera will be used
+	/// @returns a PickingInfo
+	external PickingInfo pickSpriteWithRay(Ray ray, [bool Function(Sprite sprite) predicate, bool fastCheck, Camera camera]);
+	
+	/// Launch a ray to try to pick sprites in the scene
+	/// @param x position on screen
+	/// @param y position on screen
+	/// @param predicate Predicate function used to determine eligible sprites. Can be set to null. In this case, a sprite must have isPickable set to true
+	/// @param camera camera to use for computing the picking ray. Can be set to null. In this case, the scene.activeCamera will be used
+	/// @returns a PickingInfo array
+	external List<PickingInfo> multiPickSprite(num x, num y, [bool Function(Sprite sprite) predicate, Camera camera]);
+	
+	/// Use the given ray to pick sprites in the scene
+	/// @param ray The ray (in world space) to use to pick meshes
+	/// @param predicate Predicate function used to determine eligible sprites. Can be set to null. In this case, a sprite must have isPickable set to true
+	/// @param camera camera to use. Can be set to null. In this case, the scene.activeCamera will be used
+	/// @returns a PickingInfo array
+	external List<PickingInfo> multiPickSpriteWithRay(Ray ray, [bool Function(Sprite sprite) predicate, Camera camera]);
+	
+	/// Force the sprite under the pointer
+	/// @param sprite defines the sprite to use
+	external void setPointerOverSprite(Sprite sprite);
+	
+	/// Gets the sprite under the pointer
+	/// @returns a Sprite or null if no sprite is under the pointer
+	external Sprite getPointerOverSprite();
+	
+	/// Will start the animation sequence of a given target
+	/// @param target defines the target
+	/// @param from defines from which frame should animation start
+	/// @param to defines until which frame should animation run.
+	/// @param weight defines the weight to apply to the animation (1.0 by default)
+	/// @param loop defines if the animation loops
+	/// @param speedRatio defines the speed in which to run the animation (1.0 by default)
+	/// @param onAnimationEnd defines the function to be executed when the animation ends
+	/// @param animatable defines an animatable object. If not provided a new one will be created from the given params
+	/// @param targetMask defines if the target should be animated if animations are present (this is called recursively on descendant animatables regardless of return value)
+	/// @param onAnimationLoop defines the callback to call when an animation loops
+	/// @returns the animatable object created for this animation
+	external Animatable beginWeightedAnimation(dynamic target, num from, num to, num weight, [bool loop, num speedRatio, void Function() onAnimationEnd, Animatable animatable, bool Function(dynamic target) targetMask, void Function() onAnimationLoop]);
+	
+	/// Will start the animation sequence of a given target
+	/// @param target defines the target
+	/// @param from defines from which frame should animation start
+	/// @param to defines until which frame should animation run.
+	/// @param loop defines if the animation loops
+	/// @param speedRatio defines the speed in which to run the animation (1.0 by default)
+	/// @param onAnimationEnd defines the function to be executed when the animation ends
+	/// @param animatable defines an animatable object. If not provided a new one will be created from the given params
+	/// @param stopCurrent defines if the current animations must be stopped first (true by default)
+	/// @param targetMask defines if the target should be animate if animations are present (this is called recursively on descendant animatables regardless of return value)
+	/// @param onAnimationLoop defines the callback to call when an animation loops
+	/// @returns the animatable object created for this animation
+	external Animatable beginAnimation(dynamic target, num from, num to, [bool loop, num speedRatio, void Function() onAnimationEnd, Animatable animatable, bool stopCurrent, bool Function(dynamic target) targetMask, void Function() onAnimationLoop]);
+	
+	/// Will start the animation sequence of a given target and its hierarchy
+	/// @param target defines the target
+	/// @param directDescendantsOnly if true only direct descendants will be used, if false direct and also indirect (children of children, an so on in a recursive manner) descendants will be used.
+	/// @param from defines from which frame should animation start
+	/// @param to defines until which frame should animation run.
+	/// @param loop defines if the animation loops
+	/// @param speedRatio defines the speed in which to run the animation (1.0 by default)
+	/// @param onAnimationEnd defines the function to be executed when the animation ends
+	/// @param animatable defines an animatable object. If not provided a new one will be created from the given params
+	/// @param stopCurrent defines if the current animations must be stopped first (true by default)
+	/// @param targetMask defines if the target should be animated if animations are present (this is called recursively on descendant animatables regardless of return value)
+	/// @param onAnimationLoop defines the callback to call when an animation loops
+	/// @returns the list of created animatables
+	external List<Animatable> beginHierarchyAnimation(dynamic target, bool directDescendantsOnly, num from, num to, [bool loop, num speedRatio, void Function() onAnimationEnd, Animatable animatable, bool stopCurrent, bool Function(dynamic target) targetMask, void Function() onAnimationLoop]);
+	
+	/// Begin a new animation on a given node
+	/// @param target defines the target where the animation will take place
+	/// @param animations defines the list of animations to start
+	/// @param from defines the initial value
+	/// @param to defines the final value
+	/// @param loop defines if you want animation to loop (off by default)
+	/// @param speedRatio defines the speed ratio to apply to all animations
+	/// @param onAnimationEnd defines the callback to call when an animation ends (will be called once per node)
+	/// @param onAnimationLoop defines the callback to call when an animation loops
+	/// @returns the list of created animatables
+	external Animatable beginDirectAnimation(dynamic target, List<Animation> animations, num from, num to, [bool loop, num speedRatio, void Function() onAnimationEnd, void Function() onAnimationLoop]);
+	
+	/// Begin a new animation on a given node and its hierarchy
+	/// @param target defines the root node where the animation will take place
+	/// @param directDescendantsOnly if true only direct descendants will be used, if false direct and also indirect (children of children, an so on in a recursive manner) descendants will be used.
+	/// @param animations defines the list of animations to start
+	/// @param from defines the initial value
+	/// @param to defines the final value
+	/// @param loop defines if you want animation to loop (off by default)
+	/// @param speedRatio defines the speed ratio to apply to all animations
+	/// @param onAnimationEnd defines the callback to call when an animation ends (will be called once per node)
+	/// @param onAnimationLoop defines the callback to call when an animation loops
+	/// @returns the list of animatables created for all nodes
+	external List<Animatable> beginDirectHierarchyAnimation(Node target, bool directDescendantsOnly, List<Animation> animations, num from, num to, [bool loop, num speedRatio, void Function() onAnimationEnd, void Function() onAnimationLoop]);
+	
+	/// Gets the animatable associated with a specific target
+	/// @param target defines the target of the animatable
+	/// @returns the required animatable if found
+	external Animatable getAnimatableByTarget(dynamic target);
+	
+	/// Gets all animatables associated with a given target
+	/// @param target defines the target to look animatables for
+	/// @returns an array of Animatables
+	external List<Animatable> getAllAnimatablesByTarget(dynamic target);
+	
+	/// Stops and removes all animations that have been applied to the scene
+	external void stopAllAnimations();
+	
+	/// Gets the current delta time used by animation engine
+	external num get deltaTime;
+	external set deltaTime(num value);
+	
 	/// The main sound track played by the scene.
 	/// It cotains your primary collection of sounds.
 	external SoundTrack get mainSoundTrack;
@@ -11864,6 +12097,156 @@ class Engine extends ThinEngine {
 	/// @see http://doc.babylonjs.com/how_to/creating_a_custom_loading_screen
 	external set loadingUIBackgroundColor(String value);
 	
+	/// Creates a raw texture
+	/// @param data defines the data to store in the texture
+	/// @param width defines the width of the texture
+	/// @param height defines the height of the texture
+	/// @param format defines the format of the data
+	/// @param generateMipMaps defines if the engine should generate the mip levels
+	/// @param invertY defines if data must be stored with Y axis inverted
+	/// @param samplingMode defines the required sampling mode (Texture.NEAREST_SAMPLINGMODE by default)
+	/// @param compression defines the compression used (null by default)
+	/// @param type defines the type fo the data (Engine.TEXTURETYPE_UNSIGNED_INT by default)
+	/// @returns the raw texture inside an InternalTexture
+	@override
+	external InternalTexture createRawTexture(dynamic data, num width, num height, num format, bool generateMipMaps, bool invertY, num samplingMode, [String compression, num type]);
+	
+	/// Update a raw texture
+	/// @param texture defines the texture to update
+	/// @param data defines the data to store in the texture
+	/// @param format defines the format of the data
+	/// @param invertY defines if data must be stored with Y axis inverted
+	external void updateRawTexture(InternalTexture texture, dynamic data, num format, bool invertY);
+	
+	/// Creates a new raw cube texture
+	/// @param data defines the array of data to use to create each face
+	/// @param size defines the size of the textures
+	/// @param format defines the format of the data
+	/// @param type defines the type of the data (like Engine.TEXTURETYPE_UNSIGNED_INT)
+	/// @param generateMipMaps  defines if the engine should generate the mip levels
+	/// @param invertY defines if data must be stored with Y axis inverted
+	/// @param samplingMode defines the required sampling mode (like Texture.NEAREST_SAMPLINGMODE)
+	/// @param compression defines the compression used (null by default)
+	/// @returns the cube texture as an InternalTexture
+	@override
+	external InternalTexture createRawCubeTexture(List<dynamic> data, num size, num format, num type, bool generateMipMaps, bool invertY, num samplingMode, [String compression]);
+	
+	/// Update a raw cube texture
+	/// @param texture defines the texture to udpdate
+	/// @param data defines the data to store
+	/// @param format defines the data format
+	/// @param type defines the type fo the data (Engine.TEXTURETYPE_UNSIGNED_INT by default)
+	/// @param invertY defines if data must be stored with Y axis inverted
+	external void updateRawCubeTexture(InternalTexture texture, List<dynamic> data, num format, num type, bool invertY);
+	
+	/// Creates a new raw cube texture from a specified url
+	/// @param url defines the url where the data is located
+	/// @param scene defines the current scene
+	/// @param size defines the size of the textures
+	/// @param format defines the format of the data
+	/// @param type defines the type fo the data (like Engine.TEXTURETYPE_UNSIGNED_INT)
+	/// @param noMipmap defines if the engine should avoid generating the mip levels
+	/// @param callback defines a callback used to extract texture data from loaded data
+	/// @param mipmapGenerator defines to provide an optional tool to generate mip levels
+	/// @param onLoad defines a callback called when texture is loaded
+	/// @param onError defines a callback called if there is an error
+	/// @returns the cube texture as an InternalTexture
+	external InternalTexture createRawCubeTextureFromUrl(String url, Scene scene, num size, num format, num type, bool noMipmap, List<dynamic> Function(ByteBuffer ArrayBuffer) callback, List<List<dynamic>> Function(List<dynamic> faces) mipmapGenerator, void Function() onLoad, void Function([String message, dynamic exception]) onError);
+	
+	/// Creates a new raw 3D texture
+	/// @param data defines the data used to create the texture
+	/// @param width defines the width of the texture
+	/// @param height defines the height of the texture
+	/// @param depth defines the depth of the texture
+	/// @param format defines the format of the texture
+	/// @param generateMipMaps defines if the engine must generate mip levels
+	/// @param invertY defines if data must be stored with Y axis inverted
+	/// @param samplingMode defines the required sampling mode (like Texture.NEAREST_SAMPLINGMODE)
+	/// @param compression defines the compressed used (can be null)
+	/// @param textureType defines the compressed used (can be null)
+	/// @returns a new raw 3D texture (stored in an InternalTexture)
+	@override
+	external InternalTexture createRawTexture3D(dynamic data, num width, num height, num depth, num format, bool generateMipMaps, bool invertY, num samplingMode, [String compression, num textureType]);
+	
+	/// Update a raw 3D texture
+	/// @param texture defines the texture to update
+	/// @param data defines the data to store
+	/// @param format defines the data format
+	/// @param invertY defines if data must be stored with Y axis inverted
+	external void updateRawTexture3D(InternalTexture texture, dynamic data, num format, bool invertY);
+	
+	/// Creates a new raw 2D array texture
+	/// @param data defines the data used to create the texture
+	/// @param width defines the width of the texture
+	/// @param height defines the height of the texture
+	/// @param depth defines the number of layers of the texture
+	/// @param format defines the format of the texture
+	/// @param generateMipMaps defines if the engine must generate mip levels
+	/// @param invertY defines if data must be stored with Y axis inverted
+	/// @param samplingMode defines the required sampling mode (like Texture.NEAREST_SAMPLINGMODE)
+	/// @param compression defines the compressed used (can be null)
+	/// @param textureType defines the compressed used (can be null)
+	/// @returns a new raw 2D array texture (stored in an InternalTexture)
+	@override
+	external InternalTexture createRawTexture2DArray(dynamic data, num width, num height, num depth, num format, bool generateMipMaps, bool invertY, num samplingMode, [String compression, num textureType]);
+	
+	/// Update a raw 2D array texture
+	/// @param texture defines the texture to update
+	/// @param data defines the data to store
+	/// @param format defines the data format
+	/// @param invertY defines if data must be stored with Y axis inverted
+	external void updateRawTexture2DArray(InternalTexture texture, dynamic data, num format, bool invertY);
+	
+	/// Creates a new multiview render target
+	/// @param width defines the width of the texture
+	/// @param height defines the height of the texture
+	/// @returns the created multiview texture
+	external InternalTexture createMultiviewRenderTargetTexture(num width, num height);
+	
+	/// Binds a multiview framebuffer to be drawn to
+	/// @param multiviewTexture texture to bind
+	external void bindMultiviewFramebuffer(InternalTexture multiviewTexture);
+	
+	/// Observable signaled when VR display mode changes
+	external Observable<IDisplayChangedEventArgs> get onVRDisplayChangedObservable;
+	external set onVRDisplayChangedObservable(Observable<IDisplayChangedEventArgs> value);
+	
+	/// Observable signaled when VR request present is complete
+	external Observable<bool> get onVRRequestPresentComplete;
+	external set onVRRequestPresentComplete(Observable<bool> value);
+	
+	/// Observable signaled when VR request present starts
+	external Observable<Engine> get onVRRequestPresentStart;
+	external set onVRRequestPresentStart(Observable<Engine> value);
+	
+	/// Gets a boolean indicating that the engine is currently in VR exclusive mode for the pointers
+	/// @see https://docs.microsoft.com/en-us/microsoft-edge/webvr/essentials#mouse-input
+	external bool get isInVRExclusivePointerMode;
+	external set isInVRExclusivePointerMode(bool value);
+	
+	/// Gets a boolean indicating if a webVR device was detected
+	/// @returns true if a webVR device was detected
+	external bool isVRDevicePresent();
+	
+	/// Gets the current webVR device
+	/// @returns the current webVR device (or null)
+	external dynamic getVRDevice();
+	
+	/// Initializes a webVR display and starts listening to display change events
+	/// The onVRDisplayChangedObservable will be notified upon these changes
+	/// @returns A promise containing a VRDisplay and if vr is supported
+	external Promise<IDisplayChangedEventArgs> initWebVRAsync();
+	
+	/// Gets or sets the presentation attributes used to configure VR rendering
+	external IVRPresentationAttributes get vrPresentationAttributes;
+	external set vrPresentationAttributes(IVRPresentationAttributes value);
+	
+	/// Call this function to switch to webVR mode
+	/// Will do nothing if webVR is not supported or if there is no webVR device
+	/// @param options the webvr options provided to the camera. mainly used for multiview
+	/// @see http://doc.babylonjs.com/how_to/webvr_camera
+	external void enableVR(WebVROptions options);
+	
 	/// Create a new webGL query (you must be sure that queries are supported by checking getCaps() function)
 	/// @return the new query
 	external WebGL.Query createQuery();
@@ -12186,6 +12569,11 @@ abstract class AbstractScene {
 	
 	/// @returns all meshes, lights, cameras, transformNodes and bones
 	external List<Node> getNodes();
+	
+	/// The list of procedural textures added to the scene
+	/// @see http://doc.babylonjs.com/how_to/how_to_use_procedural_textures
+	external List<ProceduralTexture> get proceduralTextures;
+	external set proceduralTextures(List<ProceduralTexture> value);
 	
 	/// The list of sounds used in the scene.
 	external List<Sound> get sounds;
@@ -16819,6 +17207,12 @@ class Mesh extends AbstractMesh implements IGetSetVerticesData {
 	/// @hidden
 	external void removeInstance(InstancedMesh instance);
 	
+	/// Register a custom buffer that will be instanced
+	/// @see https://doc.babylonjs.com/how_to/how_to_use_instances#custom-buffers
+	/// @param kind defines the buffer kind
+	/// @param stride defines the stride in floats
+	external void registerInstancedBuffer(String kind, num stride);
+	
 	/// Simplify the mesh according to the given array of settings.
 	/// Function will return immediately and will simplify async
 	/// @param settings a collection of simplification settings
@@ -17541,6 +17935,15 @@ class AbstractMesh extends TransformNode implements IDisposable, ICullable, IGet
 	/// @returns the currentAbstractMesh
 	/// @see https://www.babylonjs-playground.com/#19O9TU#0
 	external AbstractMesh enableEdgesRendering([num epsilon, bool checkVerticesInsteadOfIndices]);
+	
+	/// Object used to store instanced buffers defined by user
+	/// @see https://doc.babylonjs.com/how_to/how_to_use_instances#custom-buffers
+	external dynamic /* object */ get instancedBuffers;
+	external set instancedBuffers(dynamic /* object */ value);
+	
+	/// Gets the edgesRenderer associated with the mesh
+	external EdgesRenderer get edgesRenderer;
+	external set edgesRenderer(EdgesRenderer value);
 	
 	/// This function will create an octree to help to select the right submeshes for rendering, picking and collision computations.
 	/// Please note that you must have a decent number of submeshes to get performance improvements when using an octree
@@ -37788,6 +38191,7 @@ class NullEngine extends Engine {
 	/// @param size defines the size of the texture
 	/// @param options defines the options used to create the texture
 	/// @returns a new render target texture stored in an InternalTexture
+	@override
 	external InternalTexture createRenderTargetTexture(dynamic size, dynamic options);
 	
 	/// Update the sampling mode of a given texture
@@ -37826,7 +38230,8 @@ class NullEngine extends Engine {
 	/// @param premulAlpha defines if alpha is stored as premultiplied
 	/// @param format defines the format of the data
 	/// @param forceBindTexture if the texture should be forced to be bound eg. after a graphics context loss (Default: false)
-	external void updateDynamicTexture(InternalTexture texture, HTML.CanvasElement canvas, bool invertY, [bool premulAlpha, num format]);
+	@override
+	external void updateDynamicTexture(InternalTexture texture, dynamic canvas, bool invertY, [bool premulAlpha, num format, bool forceBindTexture]);
 	
 	/// Gets a boolean indicating if all created effects are ready
 	/// @returns true if all effects are ready
@@ -38369,6 +38774,7 @@ class NativeEngine extends Engine {
 	@override
 	external List<WebGL.UniformLocation> getUniforms(IPipelineContext pipelineContext, List<String> uniformsNames);
 	
+	@override
 	external void bindUniformBlock(IPipelineContext pipelineContext, String blockName, num index);
 	
 	@override
@@ -38542,8 +38948,10 @@ class NativeEngine extends Engine {
 	/// @param lodOffset defines the offset applied to environment texture. This manages first LOD level used for IBL according to the roughness
 	/// @param fallback defines texture to use while falling back when (compressed) texture file not found.
 	/// @returns the cube texture as an InternalTexture
+	@override
 	external InternalTexture createCubeTexture(String rootUrl, Scene scene, List<String> files, [bool noMipmap, void Function([dynamic data]) onLoad, void Function([String message, dynamic exception]) onError, num format, dynamic forcedExtension, bool createPolynomials, num lodScale, num lodOffset, InternalTexture fallback]);
 	
+	@override
 	external NativeTexture createRenderTargetTexture(dynamic size, dynamic options);
 	
 	@override
