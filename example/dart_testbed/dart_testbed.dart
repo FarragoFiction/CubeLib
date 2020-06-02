@@ -6,6 +6,7 @@ import "dart:typed_data";
 
 //import "package:CommonLib/utility.dart";
 import "package:CubeLib/CubeLib.dart" as B;
+import "package:LoaderLib/Loader.dart";
 
 Element debugDiv = querySelector("#debugdiv");
 
@@ -25,34 +26,133 @@ Future<Null> main() async {
 
     B.Texture depth = scene.enableDepthRenderer(camera, false).getDepthMap();
 
-    B.Light light1 = new B.HemisphericLight("light1", new B.Vector3(1,1,0), scene);
+    //B.HemisphericLight light1 = new B.HemisphericLight("light1", new B.Vector3(1,1,0), scene)
+    //..diffuse.set(0.15, 0.15, 0.15);
     //B.Light light2 = new B.PointLight("light2", new B.Vector3(0,1,-1), scene);
     //B.DirectionalLight light2 = new B.DirectionalLight("light2", new B.Vector3(1,0.6,1), scene);
 
     //B.CascadedShadowGenerator shadows = new B.CascadedShadowGenerator(1024, light2);
 
+    final String mspaVert = await Loader.getResource("basic.vert");
+    final String mspaFrag = await Loader.getResource("stylised.frag");
+
+    final B.ShaderMaterial material = new B.ShaderMaterial("stylised", scene, B.ShaderMaterialShaderPath(
+        vertexSource: mspaVert,
+        fragmentSource: mspaFrag
+    ), B.IShaderMaterialOptions(
+        attributes: <String>["position", "normal", "uv", "color", "world0","world1","world2","world3"],
+        uniforms: <String>["world", "viewProjection", "worldViewProjection", "lightDirection", "mainLight", "fillLight", "ambientLight", "lightPositions", "lightColours", "lightRanges"],
+        defines: <String>[]//"#define INSTANCES"]
+    ));
+
+
     //B.Mesh sphere = B.MeshBuilder.CreateSphere("sphere", B.MeshBuilderCreateSphereOptions(diameter: 2), scene)
-    B.Mesh sphere = B.MeshBuilder.CreateBox("sphere", B.MeshBuilderCreateBoxOptions(size: 2), scene)
+    B.Mesh object = B.MeshBuilder.CreateBox("box", B.MeshBuilderCreateBoxOptions(size: 2), scene)
+        ..material = material
         //..receiveShadows = true
-        ..isVisible = false;
+        //..isVisible = false
+    ;
+
+
+
 
     //Random rand = new Random(1);
     Math.Random rand = new Math.Random(1);
 
-    int range = 10;
+    int range = 6;
     double spacing = 7.0;
+    List<B.Mesh> objects = <B.Mesh>[];
+
     for (int x = -range; x<=range; x++) {
         for (int y = -range; y<=range; y++) {
             for (int z = -range; z<=range; z++) {
-                B.InstancedMesh instance = sphere.createInstance("i_${x}_${y}_$z")
+                if(x == 0 && y == 0 && z == 0) {
+                    objects.add(object
+                        ..position.set(spacing * x, spacing * y, spacing * z)
+                        ..rotation.set(rand.nextDouble() * Math.pi * 2, rand.nextDouble() * Math.pi * 2, 0)
+                    );
+                    //object.createInstance("test");
+                } else {
+                    objects.add(object.clone("i_${x}_${y}_$z")
+                        ..position.set(spacing * x, spacing * y, spacing * z)
+                        ..rotation.set(rand.nextDouble() * Math.pi * 2, rand.nextDouble() * Math.pi * 2, 0)
+                    );
+                }
+
+                /*B.InstancedMesh instance = object.createInstance("i_${x}_${y}_$z")
                     ..position.set(spacing * x, spacing * y, spacing * z)
                     ..rotation.set(rand.nextDouble() * Math.pi * 2, rand.nextDouble() * Math.pi * 2, 0)
-                ;
+                ;*/
 
                 //shadows.getShadowMap().renderList.add(instance);
             }
         }
     }
+    object = B.Mesh.MergeMeshes(objects)
+        ..alwaysSelectAsActiveMesh = true
+        ..doNotSyncBoundingInfo = true
+        ..freezeWorldMatrix()
+    ;
+
+    const int lightCount = 100;
+
+    B.TransformNode lightNode = new B.Mesh("lightParent", scene);
+    double scatterRange = 2 * range * spacing;
+
+    for(int i=0; i<lightCount; i++) {
+        new B.PointLight("PointLight$i", new B.Vector3((rand.nextDouble() - 0.5) * scatterRange, (rand.nextDouble() - 0.5) * scatterRange, (rand.nextDouble() - 0.5) * scatterRange), scene)
+            ..diffuse.set(rand.nextDouble() * 0.75 + 0.25, rand.nextDouble() * 0.75 + 0.25, rand.nextDouble() * 0.75 + 0.25)
+        //..diffuse.set(1, 0, 0)
+            ..range = spacing * 3
+            ..parent = lightNode
+
+        ;
+    }
+
+    final List<double> lightPositions = new List<double>(lightCount*3);
+    final List<B.Color3> lightColours = new List<B.Color3>(lightCount);
+    final List<double> lightRanges = new List<double>(lightCount);
+    object.onBeforeDrawObservable.add(JS.allowInterop((dynamic a, dynamic b) {
+        //print(object);
+        material
+            ..setVector3("lightDirection", B.Vector3(0.1,1.0,0.3))//light1.direction)
+            ..setColor3("mainLight", B.Color3(0.08,0.08,0.075))
+            ..setColor3("fillLight", B.Color3(0.05,0.05,0.055))
+            ..setColor3("ambientLight", B.Color3(0.15,0.15,0.15));
+
+        for (int i=0; i<lightCount; i++) {
+            lightRanges[i] = 0;
+        }
+        int b = 0;
+        B.Vector3 pos;
+        for (int i=0; i<object.lightSources.length; i++) {
+            B.ShadowLight uLight = object.lightSources[i];
+            if (uLight.getClassName() != "PointLight") {
+                continue;
+            }
+            uLight.computeTransformedInformation();
+            pos = uLight.getAbsolutePosition();
+
+            lightPositions[b * 3] = pos.x;
+            lightPositions[b * 3 + 1] = pos.y;
+            lightPositions[b * 3 + 2] = pos.z;
+            lightColours[b] = uLight.diffuse;
+            lightRanges[b] = uLight.range;
+            b++;
+            if (b >= lightCount) {
+                break;
+            }
+        }
+        material
+            ..setArray3("lightPositions", lightPositions)
+            ..setColor3Array("lightColours", lightColours)
+            ..setFloats("lightRanges", lightRanges);
+
+        lightNode.rotation.addInPlaceFromFloats(0.002, 0.005, -0.0005);
+        //print(lightNode.position);
+    }));
+
+
 
     /*B.Mesh testplane = B.MeshBuilder.CreatePlane("testplane", B.MeshBuilderCreatePlaneOptions(size: 2), scene)
         ..position.set(0, 0, -5)
@@ -77,6 +177,8 @@ Future<Null> main() async {
     engine.runRenderLoop(JS.allowInterop((){
         scene.render();
     }));
+
+    document.body.append(new DivElement()..append(new ButtonElement()..text="show inspector"..onClick.listen((MouseEvent e) { scene.debugLayer.show(); })));
 }
 
 String printMatrix(B.Matrix m) {
