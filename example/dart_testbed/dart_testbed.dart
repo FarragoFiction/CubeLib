@@ -4,7 +4,7 @@ import "dart:js" as JS;
 import "dart:math" as Math;
 import "dart:typed_data";
 
-//import "package:CommonLib/utility.dart";
+import "package:CommonLib/Utility.dart";
 import "package:CubeLib/CubeLib.dart" as B;
 import "package:LoaderLib/Loader.dart";
 
@@ -41,10 +41,18 @@ Future<Null> main() async {
         fragmentSource: mspaFrag
     ), B.IShaderMaterialOptions(
         attributes: <String>["position", "normal", "uv", "color", "world0","world1","world2","world3"],
-        uniforms: <String>["world", "viewProjection", "worldViewProjection", "lightDirection", "mainLight", "fillLight", "ambientLight", "lightPositions", "lightColours", "lightRanges"],
+        uniforms: <String>["world", "viewProjection", "worldViewProjection", "cameraPos",
+            "lightDirection", "mainLight", "fillLight", "ambientLight", "lightPositions", "lightColours", "lightRanges"
+        ],
+        samplers: ["normalSampler"],
         defines: <String>[]//"#define INSTANCES"]
     ));
 
+    B.Texture normalTest = await awaitify((Lambda<B.Texture> consumer) {
+        B.Texture t;
+        t = new B.Texture("normaltest.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
+    });
+    //B.Texture normalTest = new B.Texture("normaltest.png", engine);
 
     //B.Mesh sphere = B.MeshBuilder.CreateSphere("sphere", B.MeshBuilderCreateSphereOptions(diameter: 2), scene)
     B.Mesh object = B.MeshBuilder.CreateBox("box", B.MeshBuilderCreateBoxOptions(size: 2), scene)
@@ -53,7 +61,9 @@ Future<Null> main() async {
         //..isVisible = false
     ;
 
-
+    B.Mesh testSphere = B.MeshBuilder.CreateSphere("testSphere", B.MeshBuilderCreateSphereOptions(diameter:4), scene)
+        ..material = material
+        ..position.set(5, 0, 0);
 
 
     //Random rand = new Random(1);
@@ -113,12 +123,17 @@ Future<Null> main() async {
     final List<B.Color3> lightColours = new List<B.Color3>(lightCount);
     final List<double> lightRanges = new List<double>(lightCount);
     object.onBeforeDrawObservable.add(JS.allowInterop((dynamic a, dynamic b) {
-        //print(object);
+        //print("object");
         material
             ..setVector3("lightDirection", B.Vector3(0.1,1.0,0.3))//light1.direction)
             ..setColor3("mainLight", B.Color3(0.08,0.08,0.075))
             ..setColor3("fillLight", B.Color3(0.05,0.05,0.055))
-            ..setColor3("ambientLight", B.Color3(0.15,0.15,0.15));
+            ..setColor3("ambientLight", B.Color3(0.15,0.15,0.15))
+            ..setVector3("cameraPos", camera.position)
+
+            ..setTexture("normalSampler", normalTest)
+        ;
+        //print(normalTest.getSize());
 
         for (int i=0; i<lightCount; i++) {
             lightRanges[i] = 0;
@@ -164,6 +179,7 @@ Future<Null> main() async {
     B.Matrix invTransform = new B.Matrix();
 
     postTest.onApply = JS.allowInterop((B.Effect effect, [dynamic a]) {
+        //print("post");
         effect.setTexture("depthSampler", depth);
         effect.setFloat2("screenSize", postTest.width, postTest.height);
 
