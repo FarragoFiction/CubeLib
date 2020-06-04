@@ -40,12 +40,12 @@ Future<Null> main() async {
         vertexSource: mspaVert,
         fragmentSource: mspaFrag
     ), B.IShaderMaterialOptions(
-        attributes: <String>["position", "normal", "uv", "color", "world0","world1","world2","world3"],
+        attributes: <String>["position", "normal", "uv", "color", "tangent", "world0","world1","world2","world3"],
         uniforms: <String>["world", "viewProjection", "worldViewProjection", "cameraPos",
             "lightDirection", "mainLight", "fillLight", "ambientLight", "lightPositions", "lightColours", "lightRanges"
         ],
-        samplers: ["normalSampler"],
-        defines: <String>[]//"#define INSTANCES"]
+        samplers: <String>["normalSampler"],
+        defines: <String>["#define NORMAL", "#define TANGENT", "#define BUMP"]//, "#define INSTANCES"]
     ));
 
     B.Texture normalTest = await awaitify((Lambda<B.Texture> consumer) {
@@ -60,11 +60,27 @@ Future<Null> main() async {
         //..receiveShadows = true
         //..isVisible = false
     ;
+    B.TangentBuilder.computeTangents(object);
 
-    B.Mesh testSphere = B.MeshBuilder.CreateSphere("testSphere", B.MeshBuilderCreateSphereOptions(diameter:4), scene)
+    /*B.Mesh testSphere = B.MeshBuilder.CreateSphere("testSphere", B.MeshBuilderCreateSphereOptions(diameter:4), scene)
         ..material = material
         ..position.set(5, 0, 0);
+    B.TangentBuilder.computeTangents(testSphere);
 
+    B.Mesh testCylinder = B.MeshBuilder.CreateCylinder("testCylinder", B.MeshBuilderCreateCylinderOptions(diameter:2), scene)
+        ..material = material
+        ..position.set(-5, 0, 0);
+    B.TangentBuilder.computeTangents(testCylinder);
+
+    B.Mesh testHedron = B.MeshBuilder.CreatePolyhedron("testHedron", B.MeshBuilderCreatePolyhedronOptions(type: 1, size:1), scene)
+        ..material = material
+        ..position.set(0, 0, -5);
+    B.TangentBuilder.computeTangents(testHedron);
+
+    B.Mesh testKnot = B.MeshBuilder.CreateTorusKnot("testKnot", B.MeshBuilderCreateTorusKnotOptions(radius: 3, tubularSegments: 16, radialSegments: 128), scene)
+        ..material = material
+        ..position.set(0, 0, 5);
+    B.TangentBuilder.computeTangents(testKnot);*/
 
     //Random rand = new Random(1);
     Math.Random rand = new Math.Random(1);

@@ -24,6 +24,7 @@ varying vec4 vPosition;
 varying vec3 vNormal;
 varying vec2 vUV;
 varying vec4 vColor;
+varying mat3 vTBN;
 
 float mapRange(float value, float inLower, float inUpper, float outLower, float outUpper) {
     float fraction = clamp((value - inLower) / (inUpper - inLower), 0.0,1.0);
@@ -43,11 +44,22 @@ float lightStep(float brightness) {
     return 1.0;
 }
 
+vec3 calculateNormal(vec3 normal, vec4 map) {
+    vec3 n = map.rgb;
+    n = n * 2.0 - 1.0;
+    n = normalize(vTBN * n);
+    return n;
+}
+
 void main() {
     vec4 colour = vec4(1.0,1.0,1.0,1.0);
 
+
     vec3 normal = vNormal;
     vec4 normalMap = texture2D(normalSampler, vUV);
+    //if (vUV.x > 0.5) {
+        normal = calculateNormal(normal, normalMap);
+    //}
 
     //colour = normalMap;
 
@@ -103,6 +115,7 @@ void main() {
         colour.rgb += normalize(rimColour) * lightStep(rimBrightness);
     }
     //colour.rgb += lightColour;
+    //colour.rgb = vTBN[0] * 0.5 + 0.5;
     gl_FragColor = colour;
     //gl_FragColor = vec4(1.0,1.0,1.0,1.0);
 }

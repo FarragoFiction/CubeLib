@@ -5,8 +5,10 @@ precision highp int;
 attribute vec3 position;
 attribute vec3 normal;
 attribute vec2 uv;
+attribute vec4 tangent;
 attribute vec4 color;
 #include<instancesDeclaration>
+#include<bumpVertexDeclaration>
 
 // Uniforms
 uniform mat4 worldViewProjection;
@@ -18,17 +20,20 @@ varying vec3 vNormal;
 varying vec2 vUV;
 varying vec4 vColor;
 
+
 #include<helperFunctions>
 
 void main() {
+    vec3 normalUpdated = normal;
+    vec4 tangentUpdated = tangent;
+
     #include<instancesVertex>
+    #include<bumpVertex>
     vec4 p = vec4( position, 1. );
 
     mat3 normalWorld = mat3(finalWorld);
-    vec3 normalVec = normal;
-
     normalWorld = transposeMat3(inverseMat3(normalWorld));
-    normalVec = normalize(normalWorld * normal);
+    vec3 normalVec = normalize(normalWorld * normal);
 
     vNormal = normalVec;
     vUV = uv;
