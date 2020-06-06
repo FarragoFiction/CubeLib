@@ -10,21 +10,21 @@ import "package:LoaderLib/Loader.dart";
 
 Element debugDiv = querySelector("#debugdiv");
 
-Future<Null> main() async {
+Future<void> main() async {
     //await BABYLON.loadScript();
 
-    CanvasElement canvas = querySelector("#canvas");
-    B.Engine engine = new B.Engine(canvas, false);
+    final CanvasElement canvas = querySelector("#canvas");
+    final B.Engine engine = new B.Engine(canvas, false);
 
-    B.Scene scene = new B.Scene(engine);
+    final B.Scene scene = new B.Scene(engine);
 
-    B.Camera camera = new B.ArcRotateCamera("Camera", Math.pi/2, Math.pi/2, 10, new B.Vector3(0,0,0), scene);
+    final B.Camera camera = new B.ArcRotateCamera("Camera", Math.pi/2, Math.pi/2, 10, new B.Vector3(0,0,0), scene);
     camera
         //..minZ = 2.0
         ..maxZ = 500.0
         ..attachControl(canvas, true);
 
-    B.Texture depth = scene.enableDepthRenderer(camera, false).getDepthMap();
+    final B.Texture depth = scene.enableDepthRenderer(camera, false).getDepthMap();
 
     //B.HemisphericLight light1 = new B.HemisphericLight("light1", new B.Vector3(1,1,0), scene)
     //..diffuse.set(0.15, 0.15, 0.15);
@@ -35,6 +35,27 @@ Future<Null> main() async {
 
     final String mspaVert = await Loader.getResource("basic.vert");
     final String mspaFrag = await Loader.getResource("stylised.frag");
+    await B.CubeLibUtils.registerShaderInclude("commonUBO", "shaderIncludes.fx");
+
+    final B.UniformBuffer ubo = new B.UniformBuffer(engine, null, true)
+        ..addVector3("cameraPos", camera.position)
+        ..debugPrint()
+        ..addVector3("lightDirection", B.Vector3(0.1,1.0,0.3))//light1.direction)
+        ..debugPrint()
+        ..addColor3("mainLight", B.Color3(0.08,0.08,0.075))
+        ..debugPrint()
+        ..addColor3("fillLight", B.Color3(0.05,0.05,0.055))
+        ..debugPrint()
+        ..addColor3("ambientLight", B.Color3(0.15,0.15,0.15))
+        ..debugPrint()
+        ..addFloatArray("lightPositions", 4*100)
+        ..debugPrint()
+        ..addFloatArray("lightColours", 4*100)
+        ..debugPrint()
+        ..addFloatArray("lightRanges", 100)
+        ..debugPrint()
+        ..create()
+    ;
 
     final B.ShaderMaterial material = new B.ShaderMaterial("stylised", scene, B.ShaderMaterialShaderPath(
         vertexSource: mspaVert,
@@ -45,14 +66,21 @@ Future<Null> main() async {
             "lightDirection", "mainLight", "fillLight", "ambientLight", "lightPositions", "lightColours", "lightRanges"
         ],
         samplers: <String>["normalSampler"],
-        defines: <String>["#define NORMAL", "#define TANGENT", "#define BUMP"]//, "#define INSTANCES"]
+        uniformBuffers: <String>["CommonUBO"],
+        defines: <String>[
+            "#define NORMAL",
+            "#define TANGENT",
+            "#define BUMP",
+            "#define DEPTH",
+            "#define UBO",
+            //"#define INSTANCES",
+        ]
     ));
 
-    B.Texture normalTest = await awaitify((Lambda<B.Texture> consumer) {
+    final B.Texture normalTest = await awaitify((Lambda<B.Texture> consumer) {
         B.Texture t;
         t = new B.Texture("normaltest.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
     });
-    //B.Texture normalTest = new B.Texture("normaltest.png", engine);
 
     //B.Mesh sphere = B.MeshBuilder.CreateSphere("sphere", B.MeshBuilderCreateSphereOptions(diameter: 2), scene)
     B.Mesh object = B.MeshBuilder.CreateBox("box", B.MeshBuilderCreateBoxOptions(size: 2), scene)
@@ -83,11 +111,11 @@ Future<Null> main() async {
     B.TangentBuilder.computeTangents(testKnot);*/
 
     //Random rand = new Random(1);
-    Math.Random rand = new Math.Random(1);
+    final Math.Random rand = new Math.Random(1);
 
-    int range = 6;
-    double spacing = 7.0;
-    List<B.Mesh> objects = <B.Mesh>[];
+    const int range = 6;
+    const double spacing = 7.0;
+    final List<B.Mesh> objects = <B.Mesh>[];
 
     for (int x = -range; x<=range; x++) {
         for (int y = -range; y<=range; y++) {
@@ -122,8 +150,8 @@ Future<Null> main() async {
 
     const int lightCount = 100;
 
-    B.TransformNode lightNode = new B.Mesh("lightParent", scene);
-    double scatterRange = 2 * range * spacing;
+    final B.TransformNode lightNode = new B.Mesh("lightParent", scene);
+    const double scatterRange = 2 * range * spacing;
 
     for(int i=0; i<lightCount; i++) {
         new B.PointLight("PointLight$i", new B.Vector3((rand.nextDouble() - 0.5) * scatterRange, (rand.nextDouble() - 0.5) * scatterRange, (rand.nextDouble() - 0.5) * scatterRange), scene)
@@ -135,17 +163,18 @@ Future<Null> main() async {
         ;
     }
 
-    final List<double> lightPositions = new List<double>(lightCount*3);
-    final List<B.Color3> lightColours = new List<B.Color3>(lightCount);
+    final List<double> lightPositions = new List<double>(lightCount*4); // *3
+    //final List<B.Color3> lightColours = new List<B.Color3>(lightCount);
+    final List<double> lightColours = new List<double>(lightCount*4);
     final List<double> lightRanges = new List<double>(lightCount);
     object.onBeforeDrawObservable.add(JS.allowInterop((dynamic a, dynamic b) {
         //print("object");
         material
-            ..setVector3("lightDirection", B.Vector3(0.1,1.0,0.3))//light1.direction)
-            ..setColor3("mainLight", B.Color3(0.08,0.08,0.075))
-            ..setColor3("fillLight", B.Color3(0.05,0.05,0.055))
-            ..setColor3("ambientLight", B.Color3(0.15,0.15,0.15))
-            ..setVector3("cameraPos", camera.position)
+            //..setVector3("lightDirection", B.Vector3(0.1,1.0,0.3))//light1.direction)
+            //..setColor3("mainLight", B.Color3(0.08,0.08,0.075))
+            //..setColor3("fillLight", B.Color3(0.05,0.05,0.055))
+            //..setColor3("ambientLight", B.Color3(0.15,0.15,0.15))
+            //..setVector3("cameraPos", camera.position)
 
             ..setTexture("normalSampler", normalTest)
         ;
@@ -156,8 +185,38 @@ Future<Null> main() async {
         }
         int b = 0;
         B.Vector3 pos;
+        for (final B.Light iLight in scene.lights) {
+            final B.ShadowLight uLight = iLight;
+            if (uLight.getClassName() != "PointLight") {
+                continue;
+            }
+            uLight.computeTransformedInformation();
+            pos = uLight.getAbsolutePosition();
+
+            lightPositions[b * 4] = pos.x;
+            lightPositions[b * 4 + 1] = pos.y;
+            lightPositions[b * 4 + 2] = pos.z;
+            lightColours[b * 4] = uLight.diffuse.r;
+            lightColours[b * 4 + 1] = uLight.diffuse.g;
+            lightColours[b * 4 + 2] = uLight.diffuse.b;
+            lightRanges[b] = uLight.range;
+
+            b++;
+            if (b >= lightCount) {
+                break;
+            }
+        }
+        ubo.bindToEffect(material.getEffect(), "CommonUBO");
+        ubo
+            ..updateVector3("cameraPos", camera.position)
+            ..updateFloatArray("lightPositions", lightPositions)
+            ..updateFloatArray("lightColours", lightColours)
+            ..updateFloatArray("lightRanges", lightRanges)
+        ;
+
+        /*
         for (int i=0; i<object.lightSources.length; i++) {
-            B.ShadowLight uLight = object.lightSources[i];
+            final B.ShadowLight uLight = object.lightSources[i];
             if (uLight.getClassName() != "PointLight") {
                 continue;
             }
@@ -177,7 +236,7 @@ Future<Null> main() async {
         material
             ..setArray3("lightPositions", lightPositions)
             ..setColor3Array("lightColours", lightColours)
-            ..setFloats("lightRanges", lightRanges);
+            ..setFloats("lightRanges", lightRanges);*/
 
         lightNode.rotation.addInPlaceFromFloats(0.002, 0.005, -0.0005);
         //print(lightNode.position);

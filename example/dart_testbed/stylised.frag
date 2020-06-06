@@ -1,23 +1,13 @@
 precision highp float;
 precision highp int;
 
-uniform vec3 lightDirection;
+/*uniform vec3 lightDirection;
 uniform vec3 ambientLight;
 uniform vec3 mainLight;
-uniform vec3 fillLight;
+uniform vec3 fillLight;*/
 
-// ###############################
+#include<commonUBO>
 
-const int lightCount = 100;
-uniform vec3 lightPositions[lightCount];
-uniform vec3 lightColours[lightCount];
-uniform float lightRanges[lightCount];
-
-// ###############################
-
-uniform vec3 cameraPos;
-
-uniform sampler2D depthSampler;
 uniform sampler2D normalSampler;
 
 varying vec4 vPosition;
@@ -72,8 +62,10 @@ void main() {
     vec3 lightColour = vec3(0,0,0);
     float brightness = 0.0;
 
-    vec3 toCamera = normalize(cameraPos - vPosition.xyz);
-    bool isRim = dot(toCamera,normal) < 0.125;
+    vec3 cameraDiff = cameraPos - vPosition.xyz;
+    vec3 cameraDir = normalize(cameraDiff);
+    float cameraDist = length(cameraDiff);
+    bool isRim = dot(cameraDir,normal) < 0.125;
 
     /*if (isRim) {
         lightColour += vec3(2.0,0.0,0.0);
@@ -97,7 +89,7 @@ void main() {
         intensity *= intensity;
 
         if (isRim && lightFraction < 0.0) {
-            float rimFraction = clamp(-lightFraction, 0.0, 1.0) * clamp(-dot(dir, toCamera), 0.0, 1.0);
+            float rimFraction = clamp(-lightFraction, 0.0, 1.0) * clamp(-dot(dir, cameraDir), 0.0, 1.0);
             rimColour += lightColours[i] * intensity * rimFraction;
             rimBrightness += intensity * rimFraction;
         }
@@ -116,6 +108,7 @@ void main() {
     }
     //colour.rgb += lightColour;
     //colour.rgb = vTBN[0] * 0.5 + 0.5;
+    //colour.rgb = vec3(vPosition.w,vPosition.w,vPosition.w);
     gl_FragColor = colour;
     //gl_FragColor = vec4(1.0,1.0,1.0,1.0);
 }
