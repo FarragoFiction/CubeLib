@@ -1,14 +1,10 @@
 precision highp float;
 precision highp int;
 
-/*uniform vec3 lightDirection;
-uniform vec3 ambientLight;
-uniform vec3 mainLight;
-uniform vec3 fillLight;*/
-
 #include<commonUBO>
 
 uniform sampler2D normalSampler;
+uniform vec4 normalParams;
 
 varying vec4 vPosition;
 varying vec3 vNormal;
@@ -34,24 +30,37 @@ float lightStep(float brightness) {
     return 1.0;
 }
 
-vec3 calculateNormal(vec3 normal, vec4 map) {
+vec3 calculateNormal(vec3 normal, vec4 map, float depth) {
     vec3 n = map.rgb;
     n = n * 2.0 - 1.0;
+
+    float scale = mapRange(depth, normalParams.x, normalParams.z, normalParams.y, normalParams.w);
+
+    n.xy *= scale;
+    n = normalize(n);
+
     n = normalize(vTBN * n);
+
     return n;
 }
 
 void main() {
     vec4 colour = vec4(1.0,1.0,1.0,1.0);
 
+    vec3 cameraDiff = cameraPos - vPosition.xyz;
+    vec3 cameraDir = normalize(cameraDiff);
+    float cameraDist = length(cameraDiff);
+    float depth = clamp((cameraDist - cameraDepth.x) / (cameraDepth.y - cameraDepth.x), 0.0,1.0);
 
     vec3 normal = vNormal;
     vec4 normalMap = texture2D(normalSampler, vUV);
     //if (vUV.x > 0.5) {
-        normal = calculateNormal(normal, normalMap);
+        normal = calculateNormal(normal, normalMap, depth);
     //}
 
     //colour = normalMap;
+
+    bool isRim = dot(cameraDir,normal) < 0.125;
 
     float mainLightFraction = dot(normalize(lightDirection), normal);
 
@@ -62,30 +71,22 @@ void main() {
     vec3 lightColour = vec3(0,0,0);
     float brightness = 0.0;
 
-    vec3 cameraDiff = cameraPos - vPosition.xyz;
-    vec3 cameraDir = normalize(cameraDiff);
-    float cameraDist = length(cameraDiff);
-    bool isRim = dot(cameraDir,normal) < 0.125;
-
-    /*if (isRim) {
-        lightColour += vec3(2.0,0.0,0.0);
-    }*/
-
     vec3 rimColour = vec3(0,0,0);
     float rimBrightness = 0.0;
 
     for (int i=0; i<lightCount; i++) {
-        if (lightRanges[i] < 0.1) {
+        float range = lightRanges[i];
+        if (range < 0.1) {
             continue;
         }
         vec3 diff = lightPositions[i] - vPosition.xyz;
         float distance = length(diff);
         vec3 dir = normalize(diff);
-        if (distance > lightRanges[i]) {
+        if (distance > range) {
             continue;
         }
         float lightFraction = dot(dir, normal);
-        float intensity = clamp(1.0 - (distance * distance) / (lightRanges[i] * lightRanges[i]), 0.0,1.0);
+        float intensity = clamp(1.0 - (distance * distance) / (range * lightRanges[i]), 0.0,1.0);
         intensity *= intensity;
 
         if (isRim && lightFraction < 0.0) {
@@ -108,7 +109,10 @@ void main() {
     }
     //colour.rgb += lightColour;
     //colour.rgb = vTBN[0] * 0.5 + 0.5;
-    //colour.rgb = vec3(vPosition.w,vPosition.w,vPosition.w);
+
+    //float nscale = mapRange(depth, normalParams.x, normalParams.z, normalParams.y, normalParams.w);
+    //colour.rgb = vec3(nscale,nscale,nscale);
+    //colour.rgb = vec3(depth,depth,depth);
     gl_FragColor = colour;
     //gl_FragColor = vec4(1.0,1.0,1.0,1.0);
 }
