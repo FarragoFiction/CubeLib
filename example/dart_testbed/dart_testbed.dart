@@ -110,7 +110,6 @@ Future<void> main() async {
         ..position.set(0, 0, 5);
     B.TangentBuilder.computeTangents(testKnot);*/
 
-    //Random rand = new Random(1);
     final Math.Random rand = new Math.Random(1);
 
     const int range = 6;
@@ -169,7 +168,6 @@ Future<void> main() async {
             ..setTexture("normalSampler", normalTest)
             ..setVector4("normalParams", new B.Vector4(0.025, 1.0, 0.1, 0.0))
         ;
-        //print(normalTest.getSize());
 
         for (int i=0; i<lightCount; i++) {
             lightRanges[i] = 0;

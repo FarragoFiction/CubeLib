@@ -1,0 +1,128 @@
+body {
+    background-color:#EEEEEE;
+    font-family: "Arial", sans-serif;
+}
+
+div {
+    position:relative;
+}
+
+img, canvas {
+    width:100%;
+    height:100%;
+    object-position: 50% 50%;
+    object-fit: contain;
+}
+
+.topContainer, .bottomContainer {
+    margin:0 auto 0 auto;
+    text-align:center;
+}
+
+.topContainer {
+    width:980px;
+}
+
+.bottomContainer {
+    width:320px;
+}
+
+.container {
+    border: 1px solid black;
+    padding:5px;
+    margin:2px;
+    width:314px;
+    height:360px;
+    display:inline-block;
+    box-sizing:border-box;
+    background-color:white;
+    box-shadow:0px 3px 3px rgba(0,0,0,0.2);
+}
+
+.image {
+    width:300px;
+    height:300px;
+    border:1px solid black;
+    margin-bottom:2px;
+}
+
+#output {
+    height:385px;
+}
+
+button {
+    margin-top:4px;
+}
+
+#red:before, #green:before, #blue:before, #red:after, #green:after, #blue:after {
+    z-index:200;
+}
+
+#red:before, #green:before, #blue:before {
+    content:"";
+    position:absolute;
+    width:0;
+    height:0;
+    left:137px;
+    top:380px;
+
+    border-style: solid;
+    border-color: transparent;
+    border-top-color: red;
+    border-width: 20px 20px 0 20px;
+
+    transform-origin: 50% -30px;
+}
+
+#red:before, #blue:before {
+    top:420px;
+    transform-origin: 50% -70px;
+}
+
+#red:after, #green:after, #blue:after {
+    content:"";
+    position:absolute;
+    width:20px;
+    height:31px;
+    /*background-color:red;*/
+    left:147px;
+    top:345px;
+
+    transform-origin: 50% 5px;
+}
+
+#red:after, #blue:after {
+    height:76px;
+}
+
+#green:after {
+    top: 355px;
+}
+
+#red:before, #red:after {
+    transform:translate(120px,0px) rotate(-45deg);
+}
+
+#blue:before, #blue:after {
+    transform:translate(-120px,0px) rotate(45deg);
+}
+#red:before {
+    border-top-color:rgb(230,20,20);
+}
+#red:after {
+    background-image: linear-gradient(rgb(120,120,120), rgb(230,20,20));
+}
+
+#green:before {
+    border-top-color:rgb(20,230,20);
+}
+#green:after {
+    background-image: linear-gradient(rgb(120,120,120), rgb(20,230,20));
+}
+
+#blue:before {
+    border-top-color:rgb(90,120,255);
+}
+#blue:after {
+    background-image: linear-gradient(rgb(120,120,120), rgb(90,120,255));
+}

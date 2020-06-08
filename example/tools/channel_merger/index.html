@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="rootdepth" content="0">
+        <link rel="stylesheet" href="style.css">
+        <title>Texture Channel Merger</title>
+
+        <script defer src="channel_merger.dart.js" type="application/javascript"></script>
+    </head>
+    <body>
+        <div class="topContainer">
+            <div id="red" class="container">
+                <div id="redImage" class="image"></div>
+                <div id="redButton" class="button"></div>
+            </div>
+            <div id="green" class="container">
+                <div id="greenImage" class="image"></div>
+                <div id="greenButton" class="button"></div>
+            </div>
+            <div id="blue" class="container">
+                <div id="blueImage" class="image"></div>
+                <div id="blueButton" class="button"></div>
+            </div>
+        </div>
+        <div class="bottomContainer">
+            <div id="output" class="container">
+                <div id="outputImage" class="image">
+                    <canvas id="outputCanvas" width="300" height="300"></canvas>
+                </div>
+                <div id="outputButton" class="button"></div>
+            </div>
+        </div>
+    </body>
+</html>
