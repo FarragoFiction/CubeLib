@@ -12,6 +12,9 @@ const int lightCount = 100;
         vec3 lightPositions[lightCount];
         vec3 lightColours[lightCount];
         float lightRanges[lightCount];
+
+        vec2 fogInfo;
+        vec3 fogColour;
     };
     //uniform vec3 lightPositions[lightCount];
     //uniform vec3 lightColours[lightCount];
@@ -27,6 +30,9 @@ const int lightCount = 100;
     uniform vec3 lightPositions[lightCount];
     uniform vec3 lightColours[lightCount];
     uniform float lightRanges[lightCount];
+
+    uniform vec2 fogInfo;
+    uniform vec3 fogColour;
 #endif
 
 #ifdef DEPTH

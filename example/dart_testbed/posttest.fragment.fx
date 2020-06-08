@@ -217,6 +217,8 @@ void main(void)
         float noise;
         vec2 samplePos = vUV;
 
+        float thresholdDepth = depth.depth;
+
         if (!isOuterEdge) {
             // we're on an interior edge, sample directly
             noise = worldNoise(depth.depth, vUV);
@@ -229,14 +231,19 @@ void main(void)
             float d = texture2D(depthSampler, vUV + o).r;
             noise = worldNoise(d, vUV + o);
             if (noise > 0.0) {
+                thresholdDepth = d;
                 samplePos += o;
             }
         }
 
-        float threshold = smoothstep(0.0,1.0, (depth.depth - 0.1) / 0.8);
+        float threshold = smoothstep(0.0,1.0, (thresholdDepth - 0.1) / 0.8);
 
         if (noise > threshold) {
             gl_FragColor = texture2D(textureSampler, samplePos);
         }
     }
+
+    //gl_FragColor = vec4(depth.depth,depth.depth,depth.depth,1.0);
+    //gl_FragColor = vec4(depth.mag,depth.mag,depth.mag,1.0);
+    //gl_FragColor = vec4(((depth.dir)) * 100.0, 0.0,1.0);
 }

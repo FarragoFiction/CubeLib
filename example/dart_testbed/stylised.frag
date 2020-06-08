@@ -52,6 +52,8 @@ void main() {
     float cameraDist = length(cameraDiff);
     float depth = clamp((cameraDist - cameraDepth.x) / (cameraDepth.y - cameraDepth.x), 0.0,1.0);
 
+    float fogVal = mapRange(cameraDist, fogInfo.x, fogInfo.y, 0.0, 1.0);
+
     vec3 normal = vNormal;
     vec4 normalMap = texture2D(normalSampler, vUV);
     //if (vUV.x > 0.5) {
@@ -113,6 +115,7 @@ void main() {
     //float nscale = mapRange(depth, normalParams.x, normalParams.z, normalParams.y, normalParams.w);
     //colour.rgb = vec3(nscale,nscale,nscale);
     //colour.rgb = vec3(depth,depth,depth);
-    gl_FragColor = colour;
+
+    gl_FragColor = mix(colour, vec4(fogColour, 1.0), fogVal);
     //gl_FragColor = vec4(1.0,1.0,1.0,1.0);
 }

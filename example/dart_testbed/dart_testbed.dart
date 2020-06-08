@@ -54,6 +54,8 @@ Future<void> main() async {
         ..addVector3Array("lightPositions", lightPositions)
         ..addColor3Array("lightColours", lightColours)
         ..addFloatArray("lightRanges", lightRanges)
+        ..addFloat2("fogInfo", 10, 80)
+        ..addColor3("fogColour", new B.Color3(scene.clearColor.r, scene.clearColor.g, scene.clearColor.b))//0.5,0.5,0.6))
         ..create()
     ;
 
@@ -199,31 +201,6 @@ Future<void> main() async {
             ..updateFloatArray("lightRanges", lightRanges)
             ..update()
         ;
-
-        /*
-        for (int i=0; i<object.lightSources.length; i++) {
-            final B.ShadowLight uLight = object.lightSources[i];
-            if (uLight.getClassName() != "PointLight") {
-                continue;
-            }
-            uLight.computeTransformedInformation();
-            pos = uLight.getAbsolutePosition();
-
-            lightPositions[b * 3] = pos.x;
-            lightPositions[b * 3 + 1] = pos.y;
-            lightPositions[b * 3 + 2] = pos.z;
-            lightColours[b] = uLight.diffuse;
-            lightRanges[b] = uLight.range;
-            b++;
-            if (b >= lightCount) {
-                break;
-            }
-        }
-        material
-            ..setArray3("lightPositions", lightPositions)
-            ..setColor3Array("lightColours", lightColours)
-            ..setFloats("lightRanges", lightRanges);*/
-
         lightNode.rotation.addInPlaceFromFloats(0.002, 0.005, -0.0005);
         //print(lightNode.position);
     }));
