@@ -84,6 +84,9 @@ Future<void> main() async {
         t = new B.Texture("normaltest.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
     });
 
+    final B.Texture defaultNormalTexture = new B.RawTexture(new Uint8ClampedList.fromList(<int>[128,128,255]), 1,1, B.Engine.TEXTUREFORMAT_RGB, scene);
+    final B.Texture defaultLightTexture = new B.RawTexture(new Uint8ClampedList.fromList(<int>[128,128,0]), 1,1, B.Engine.TEXTUREFORMAT_RGB, scene);
+
     //B.Mesh sphere = B.MeshBuilder.CreateSphere("sphere", B.MeshBuilderCreateSphereOptions(diameter: 2), scene)
     B.Mesh object = B.MeshBuilder.CreateBox("box", B.MeshBuilderCreateBoxOptions(size: 2), scene)
         ..material = material
@@ -92,12 +95,12 @@ Future<void> main() async {
     ;
     B.TangentBuilder.computeTangents(object);
 
-    /*B.Mesh testSphere = B.MeshBuilder.CreateSphere("testSphere", B.MeshBuilderCreateSphereOptions(diameter:4), scene)
+    B.Mesh testSphere = B.MeshBuilder.CreateSphere("testSphere", B.MeshBuilderCreateSphereOptions(diameter:4), scene)
         ..material = material
         ..position.set(5, 0, 0);
     B.TangentBuilder.computeTangents(testSphere);
 
-    B.Mesh testCylinder = B.MeshBuilder.CreateCylinder("testCylinder", B.MeshBuilderCreateCylinderOptions(diameter:2), scene)
+    /*B.Mesh testCylinder = B.MeshBuilder.CreateCylinder("testCylinder", B.MeshBuilderCreateCylinderOptions(diameter:2), scene)
         ..material = material
         ..position.set(-5, 0, 0);
     B.TangentBuilder.computeTangents(testCylinder);
@@ -168,7 +171,9 @@ Future<void> main() async {
         //print("object");
         material
             ..setTexture("normalSampler", normalTest)
+            //..setTexture("normalSampler", defaultNormalTexture)
             ..setVector4("normalParams", new B.Vector4(0.025, 1.0, 0.1, 0.0))
+            ..setTexture("lightSampler", defaultLightTexture)
         ;
 
         for (int i=0; i<lightCount; i++) {

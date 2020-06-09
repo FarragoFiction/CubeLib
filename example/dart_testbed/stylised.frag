@@ -5,6 +5,7 @@ precision highp int;
 
 uniform sampler2D normalSampler;
 uniform vec4 normalParams;
+uniform sampler2D lightSampler;
 
 varying vec4 vPosition;
 varying vec3 vNormal;
@@ -60,6 +61,8 @@ void main() {
         normal = calculateNormal(normal, normalMap, depth);
     //}
 
+    vec4 lightMap = texture2D(lightSampler, vUV);
+
     //colour = normalMap;
 
     bool isRim = dot(cameraDir,normal) < 0.125;
@@ -75,6 +78,9 @@ void main() {
 
     vec3 rimColour = vec3(0,0,0);
     float rimBrightness = 0.0;
+
+    vec3 specularColour = vec3(0,0,0);
+    float specularBrightness = 0.0;
 
     for (int i=0; i<lightCount; i++) {
         float range = lightRanges[i];
@@ -97,18 +103,33 @@ void main() {
             rimBrightness += intensity * rimFraction;
         }
 
+        if (lightFraction > 0.0) {
+            vec3 halfVector = normalize(dir + cameraDir);
+            float specularFraction = clamp(dot(halfVector, normal), 0.0,1.0);
+            float specularVal = pow(specularFraction, 128.0 * lightMap.g);
+            specularBrightness += intensity * specularVal;
+            specularColour += intensity * specularVal * lightColours[i];
+        }
+
         brightness += intensity * clamp(lightFraction, 0.0,1.0);
-        lightColour += lightColours[i] * intensity * clamp(lightFraction, 0.0,1.0);;
+        lightColour += lightColours[i] * intensity * clamp(lightFraction, 0.0,1.0);
         //colour.rgb += lightColours[i] * clamp(lightFraction, 0.0,1.0) * intensity;
     }
 
     if(brightness > 0.0) {
         colour.rgb += normalize(lightColour) * lightStep(brightness);
+        if (specularBrightness > 0.0) {
+            float colourMag = length(specularColour);
+            if (colourMag > 0.0) {
+                colour.rgb += (specularColour / colourMag) * specularBrightness;
+            }
+        }
     }
 
     if (rimBrightness > 0.0) {
         colour.rgb += normalize(rimColour) * lightStep(rimBrightness);
     }
+
     //colour.rgb += lightColour;
     //colour.rgb = vTBN[0] * 0.5 + 0.5;
 
@@ -118,4 +139,5 @@ void main() {
 
     gl_FragColor = mix(colour, vec4(fogColour, 1.0), fogVal);
     //gl_FragColor = vec4(1.0,1.0,1.0,1.0);
+    //gl_FragColor = normalMap;
 }
