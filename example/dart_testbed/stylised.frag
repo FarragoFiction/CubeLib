@@ -3,6 +3,7 @@ precision highp int;
 
 #include<commonUBO>
 
+uniform sampler2D diffuseSampler;
 uniform sampler2D normalSampler;
 uniform vec4 normalParams;
 uniform sampler2D lightSampler;
@@ -46,7 +47,8 @@ vec3 calculateNormal(vec3 normal, vec4 map, float depth) {
 }
 
 void main() {
-    vec4 colour = vec4(1.0,1.0,1.0,1.0);
+    vec4 diffuse = texture2D(diffuseSampler, vUV);
+    vec4 colour = diffuse;
 
     vec3 cameraDiff = cameraPos - vPosition.xyz;
     vec3 cameraDir = normalize(cameraDiff);
@@ -69,9 +71,11 @@ void main() {
 
     float mainLightFraction = dot(normalize(lightDirection), normal);
 
-    colour.rgb = (colour.rgb * ambientLight) + // ambient term
+    colour.rgb *= ((colour.rgb * ambientLight) + // ambient term
     (colour.rgb * clamp(mainLightFraction, 0.0,1.0) * mainLight) + // main term
-    (abs(clamp(mainLightFraction, -1.0, 0.0)) * fillLight); // filler term
+    (abs(clamp(mainLightFraction, -1.0, 0.0)) * fillLight)); // filler term
+
+    colour.rgb += diffuse.rgb * lightMap.z; // emissive term
 
     vec3 lightColour = vec3(0,0,0);
     float brightness = 0.0;
@@ -83,7 +87,7 @@ void main() {
     float specularBrightness = 0.0;
 
     for (int i=0; i<lightCount; i++) {
-        float range = lightRanges[i];
+        float range = lightInfo[i].x;
         if (range < 0.1) {
             continue;
         }
@@ -94,7 +98,7 @@ void main() {
             continue;
         }
         float lightFraction = dot(dir, normal);
-        float intensity = clamp(1.0 - (distance * distance) / (range * lightRanges[i]), 0.0,1.0);
+        float intensity = clamp(1.0 - (distance * distance) / (range * range), 0.0,1.0);
         intensity *= intensity;
 
         if (isRim && lightFraction < 0.0) {
@@ -106,8 +110,8 @@ void main() {
         if (lightFraction > 0.0) {
             vec3 halfVector = normalize(dir + cameraDir);
             float specularFraction = clamp(dot(halfVector, normal), 0.0,1.0);
-            float specularVal = pow(specularFraction, 128.0 * lightMap.g);
-            specularBrightness += intensity * specularVal;
+            float specularVal = pow(specularFraction, 1.0 + 127.0 * lightMap.g) * lightMap.r;
+            specularBrightness += intensity * specularVal * lightInfo[i].y;
             specularColour += intensity * specularVal * lightColours[i];
         }
 
@@ -117,11 +121,11 @@ void main() {
     }
 
     if(brightness > 0.0) {
-        colour.rgb += normalize(lightColour) * lightStep(brightness);
+        colour.rgb += normalize(lightColour) * lightStep(brightness) * diffuse.rgb;
         if (specularBrightness > 0.0) {
             float colourMag = length(specularColour);
             if (colourMag > 0.0) {
-                colour.rgb += (specularColour / colourMag) * specularBrightness;
+                colour.rgb += (specularColour / colourMag) * lightStep(specularBrightness);
             }
         }
     }

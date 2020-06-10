@@ -42,7 +42,7 @@ Future<void> main() async {
     const int lightCount = 100;
     final List<B.Vector3> lightPositions = new List<B.Vector3>(lightCount);
     final List<B.Color3> lightColours = new List<B.Color3>(lightCount);
-    final List<double> lightRanges = new Float32List(lightCount);
+    final List<B.Vector2> lightInfo = new List<B.Vector2>.generate(lightCount, (int i) => new B.Vector2());
 
     final B.UniformBuffer ubo = new B.UniformBuffer(engine, null, true)
         ..addVector3("cameraPos", camera.position)
@@ -51,9 +51,9 @@ Future<void> main() async {
         ..addColor3("mainLight", B.Color3(0.08,0.08,0.075))
         ..addColor3("fillLight", B.Color3(0.05,0.05,0.055))
         ..addColor3("ambientLight", B.Color3(0.15,0.15,0.15))
-        ..addVector3Array("lightPositions", lightPositions)
-        ..addColor3Array("lightColours", lightColours)
-        ..addFloatArray("lightRanges", lightRanges)
+        ..addArray("lightPositions", lightPositions)
+        ..addArray("lightColours", lightColours)
+        ..addArray("lightInfo", lightInfo)
         ..addFloat2("fogInfo", 10, 80)
         ..addColor3("fogColour", new B.Color3(scene.clearColor.r, scene.clearColor.g, scene.clearColor.b))//0.5,0.5,0.6))
         ..create()
@@ -67,7 +67,7 @@ Future<void> main() async {
         uniforms: <String>["world", "viewProjection", "worldViewProjection", "cameraPos", "cameraDepth", "normalParams",
             "lightDirection", "mainLight", "fillLight", "ambientLight", "lightPositions", "lightColours", "lightRanges"
         ],
-        samplers: <String>["normalSampler"],
+        samplers: <String>["diffuseSampler", "normalSampler", "lightSampler"],
         uniformBuffers: <String>["CommonUBO"],
         defines: <String>[
             "#define NORMAL",
@@ -81,7 +81,15 @@ Future<void> main() async {
 
     final B.Texture normalTest = await awaitify((Lambda<B.Texture> consumer) {
         B.Texture t;
-        t = new B.Texture("normaltest.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
+        t = new B.Texture("assets/testbox_normal.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
+    });
+    final B.Texture diffuseTest = await awaitify((Lambda<B.Texture> consumer) {
+        B.Texture t;
+        t = new B.Texture("assets/testbox_diffuse.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
+    });
+    final B.Texture lightTest = await awaitify((Lambda<B.Texture> consumer) {
+        B.Texture t;
+        t = new B.Texture("assets/testbox_light.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
     });
 
     final B.Texture defaultNormalTexture = new B.RawTexture(new Uint8ClampedList.fromList(<int>[128,128,255]), 1,1, B.Engine.TEXTUREFORMAT_RGB, scene);
@@ -173,11 +181,13 @@ Future<void> main() async {
             ..setTexture("normalSampler", normalTest)
             //..setTexture("normalSampler", defaultNormalTexture)
             ..setVector4("normalParams", new B.Vector4(0.025, 1.0, 0.1, 0.0))
-            ..setTexture("lightSampler", defaultLightTexture)
+            //..setTexture("lightSampler", defaultLightTexture)
+            ..setTexture("lightSampler", lightTest)
+            ..setTexture("diffuseSampler", diffuseTest)
         ;
 
         for (int i=0; i<lightCount; i++) {
-            lightRanges[i] = 0;
+            lightInfo[i].x = 0;
         }
         int b = 0;
         B.Vector3 pos;
@@ -191,7 +201,8 @@ Future<void> main() async {
 
             lightPositions[b] = pos;
             lightColours[b] = uLight.diffuse;
-            lightRanges[b] = uLight.range;
+            lightInfo[b].x = uLight.range;
+            lightInfo[b].y = uLight.intensity;
 
             b++;
             if (b >= lightCount) {
@@ -203,7 +214,7 @@ Future<void> main() async {
             ..updateVector3("cameraPos", camera.position)
             ..updateVector3Array("lightPositions", lightPositions)
             ..updateColor3Array("lightColours", lightColours)
-            ..updateFloatArray("lightRanges", lightRanges)
+            ..updateVector2Array("lightInfo", lightInfo)
             ..update()
         ;
         lightNode.rotation.addInPlaceFromFloats(0.002, 0.005, -0.0005);
