@@ -67,7 +67,7 @@ Future<void> main() async {
         uniforms: <String>["world", "viewProjection", "worldViewProjection", "cameraPos", "cameraDepth", "normalParams",
             "lightDirection", "mainLight", "fillLight", "ambientLight", "lightPositions", "lightColours", "lightRanges"
         ],
-        samplers: <String>["diffuseSampler", "normalSampler", "lightSampler"],
+        samplers: <String>["diffuseSampler", "normalSampler", "lightSampler", "bayerMatrix"],
         uniformBuffers: <String>["CommonUBO"],
         defines: <String>[
             "#define NORMAL",
@@ -94,6 +94,19 @@ Future<void> main() async {
 
     final B.Texture defaultNormalTexture = new B.RawTexture(new Uint8ClampedList.fromList(<int>[128,128,255]), 1,1, B.Engine.TEXTUREFORMAT_RGB, scene);
     final B.Texture defaultLightTexture = new B.RawTexture(new Uint8ClampedList.fromList(<int>[128,128,0]), 1,1, B.Engine.TEXTUREFORMAT_RGB, scene);
+    final B.Texture bayerMatrix = new B.RawTexture(new Uint8ClampedList.fromList(<int>[
+         0, 32,  8, 40,  2, 34, 10, 42,
+        48, 16, 56, 24, 50, 18, 58, 26,
+        12, 44,  4, 36, 14, 46,  6, 38,
+        60, 28, 52, 20, 62, 30, 54, 22,
+         3, 35, 11, 43,  1, 33,  9, 41,
+        51, 19, 59, 27, 49, 17, 57, 25,
+        15, 47,  7, 39, 13, 45,  5, 37,
+        63, 31, 55, 23, 61, 29, 53, 21
+    ]), 8,8, B.Engine.TEXTUREFORMAT_LUMINANCE, scene, false, false, B.Texture.NEAREST_SAMPLINGMODE, B.Engine.TEXTURETYPE_UNSIGNED_BYTE)
+        ..wrapU = B.Texture.WRAP_ADDRESSMODE
+        ..wrapV = B.Texture.WRAP_ADDRESSMODE
+    ;
 
     //B.Mesh sphere = B.MeshBuilder.CreateSphere("sphere", B.MeshBuilderCreateSphereOptions(diameter: 2), scene)
     B.Mesh object = B.MeshBuilder.CreateBox("box", B.MeshBuilderCreateBoxOptions(size: 2), scene)
@@ -184,6 +197,7 @@ Future<void> main() async {
             //..setTexture("lightSampler", defaultLightTexture)
             ..setTexture("lightSampler", lightTest)
             ..setTexture("diffuseSampler", diffuseTest)
+            ..setTexture("bayerMatrix", bayerMatrix)
         ;
 
         for (int i=0; i<lightCount; i++) {
@@ -258,4 +272,3 @@ String printMatrix(B.Matrix m) {
     B.Vector4 r3 = m.getRow(3);
     return "[${r0.x}, ${r0.y}, ${r0.z}, ${r0.w}] [${r1.x}, ${r1.y}, ${r1.z}, ${r1.w}] [${r2.x}, ${r2.y}, ${r2.z}, ${r2.w}] [${r3.x}, ${r3.y}, ${r3.z}, ${r3.w}]";
 }
-

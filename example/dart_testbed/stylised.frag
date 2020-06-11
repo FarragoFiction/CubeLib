@@ -7,6 +7,7 @@ uniform sampler2D diffuseSampler;
 uniform sampler2D normalSampler;
 uniform vec4 normalParams;
 uniform sampler2D lightSampler;
+uniform sampler2D bayerMatrix;
 
 varying vec4 vPosition;
 varying vec3 vNormal;
@@ -67,7 +68,7 @@ void main() {
 
     //colour = normalMap;
 
-    bool isRim = dot(cameraDir,normal) < 0.125;
+    bool isRim = dot(cameraDir,normal) < 0.1;//0.125;
 
     float mainLightFraction = dot(normalize(lightDirection), normal);
 
@@ -131,7 +132,7 @@ void main() {
     }
 
     if (rimBrightness > 0.0) {
-        colour.rgb += normalize(rimColour) * lightStep(rimBrightness);
+        colour.rgb += normalize(rimColour) * lightStep(rimBrightness) * diffuse.rgb;
     }
 
     //colour.rgb += lightColour;
@@ -142,6 +143,11 @@ void main() {
     //colour.rgb = vec3(depth,depth,depth);
 
     gl_FragColor = mix(colour, vec4(fogColour, 1.0), fogVal);
+
+    float dither = (texture2D(bayerMatrix, gl_FragCoord.xy / 8.0).r - 0.125) / 64.0;
+
+    gl_FragColor.rgb += vec3(dither);
     //gl_FragColor = vec4(1.0,1.0,1.0,1.0);
     //gl_FragColor = normalMap;
+    //gl_FragColor = vec4((mod(gl_FragCoord.xy, 32.0) / 32.0),0.5,1.0);
 }
