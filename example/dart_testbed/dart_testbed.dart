@@ -6,13 +6,17 @@ import "dart:typed_data";
 
 import "package:CommonLib/Utility.dart";
 import "package:CubeLib/CubeLib.dart" as B;
+import "package:CubeLib/Formats.dart";
 import "package:LoaderLib/Loader.dart";
 
 Element debugDiv = querySelector("#debugdiv");
 
 Future<void> main() async {
-    //await BABYLON.loadScript();
+    testRendering();
+    //testPngCodec();
+}
 
+Future<void> testRendering() async {
     final CanvasElement canvas = querySelector("#canvas");
     final B.Engine engine = new B.Engine(canvas, false,
         //B.EngineOptions(disableWebGL2Support: true)
@@ -79,18 +83,11 @@ Future<void> main() async {
         ]
     ));
 
-    final B.Texture normalTest = await awaitify((Lambda<B.Texture> consumer) {
-        B.Texture t;
-        t = new B.Texture("assets/testbox_normal.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
-    });
-    final B.Texture diffuseTest = await awaitify((Lambda<B.Texture> consumer) {
-        B.Texture t;
-        t = new B.Texture("assets/testbox_diffuse.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
-    });
-    final B.Texture lightTest = await awaitify((Lambda<B.Texture> consumer) {
-        B.Texture t;
-        t = new B.Texture("assets/testbox_light.png", scene, false, true, B.Texture.BILINEAR_SAMPLINGMODE, JS.allowInterop(() { consumer(t); }));
-    });
+    final TextureFormat textureFormat = new TextureFormat(scene);
+
+    final B.Texture normalTest = await Loader.getResource("assets/testbox_normal.png", format: textureFormat);
+    final B.Texture diffuseTest = await Loader.getResource("assets/testbox_diffuse.png", format: textureFormat);
+    final B.Texture lightTest = await Loader.getResource("assets/testbox_light.png", format: textureFormat);
 
     final B.Texture defaultNormalTexture = new B.RawTexture(new Uint8ClampedList.fromList(<int>[128,128,255]), 1,1, B.Engine.TEXTUREFORMAT_RGB, scene);
     final B.Texture defaultLightTexture = new B.RawTexture(new Uint8ClampedList.fromList(<int>[128,128,0]), 1,1, B.Engine.TEXTUREFORMAT_RGB, scene);
@@ -271,4 +268,24 @@ String printMatrix(B.Matrix m) {
     B.Vector4 r2 = m.getRow(2);
     B.Vector4 r3 = m.getRow(3);
     return "[${r0.x}, ${r0.y}, ${r0.z}, ${r0.w}] [${r1.x}, ${r1.y}, ${r1.z}, ${r1.w}] [${r2.x}, ${r2.y}, ${r2.z}, ${r2.w}] [${r3.x}, ${r3.y}, ${r3.z}, ${r3.w}]";
+}
+
+Future<void> testPngCodec() async {
+    final ImageElement img = await Loader.getResource("ipu.png");
+    final int w = img.naturalWidth;
+    final int h = img.naturalHeight;
+    final CanvasElement canvas = new CanvasElement(width: w, height: h);
+    final CanvasRenderingContext2D ctx = canvas.context2D;
+
+    ctx.drawImage(img, 0, 0);
+
+    final ImageData iData = ctx.getImageData(0,0,w,h);
+
+    for (int i=3; i<iData.data.length; i+=4) {
+        iData.data[i] = 255;
+    }
+
+    ctx.putImageData(iData, 0, 0);
+
+    document.body.append(canvas);
 }
