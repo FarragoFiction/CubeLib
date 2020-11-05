@@ -31,6 +31,7 @@ Future<void> testRendering() async {
         ..attachControl(canvas, true);
 
     final B.Texture depth = scene.enableDepthRenderer(camera, false).getDepthMap();
+    //scene.enableGeometryBufferRenderer()..enablePosition = true..;
 
     //B.HemisphericLight light1 = new B.HemisphericLight("light1", new B.Vector3(1,1,0), scene)
     //..diffuse.set(0.15, 0.15, 0.15);
@@ -84,6 +85,8 @@ Future<void> testRendering() async {
     ));
 
     final TextureFormat textureFormat = new TextureFormat(scene);
+
+    await Loader.loadDataPack("testtextures.zip");
 
     final B.Texture normalTest = await Loader.getResource("assets/testbox_normal.png", format: textureFormat);
     final B.Texture diffuseTest = await Loader.getResource("assets/testbox_diffuse.png", format: textureFormat);
