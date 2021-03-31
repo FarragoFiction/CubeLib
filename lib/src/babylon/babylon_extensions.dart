@@ -27,5 +27,5 @@ class ShaderMaterialWithAlphaTestTexture extends ShaderMaterial {
 class Vector2WithCallback extends Vector2 {
     external factory Vector2WithCallback(num x, num y);
 
-    external void extension_setCallback(void Function(Vector2) callback);
+    external void extension_setCallback(void Function(Vector2)? callback);
 }

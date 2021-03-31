@@ -20096,12 +20096,12 @@ class PickingInfo {
 	external set distance(num value);
 	
 	/// The location of pick collision
-	external Vector3 get pickedPoint;
-	external set pickedPoint(Vector3 value);
+	external Vector3? get pickedPoint;
+	external set pickedPoint(Vector3? value);
 	
 	/// The mesh corresponding the the pick collision
-	external AbstractMesh get pickedMesh;
-	external set pickedMesh(AbstractMesh value);
+	external AbstractMesh? get pickedMesh;
+	external set pickedMesh(AbstractMesh? value);
 	
 	/// (See getTextureCoordinates) The barycentric U coordinate that is used when calculating the texture coordinates of the collision.
 	external num get bu;
@@ -20120,16 +20120,16 @@ class PickingInfo {
 	external set subMeshId(num value);
 	
 	/// If a sprite was picked, this will be the sprite the pick collided with
-	external Sprite get pickedSprite;
-	external set pickedSprite(Sprite value);
+	external Sprite? get pickedSprite;
+	external set pickedSprite(Sprite? value);
 	
 	/// If a mesh was used to do the picking (eg. 6dof controller) this will be populated.
-	external AbstractMesh get originMesh;
-	external set originMesh(AbstractMesh value);
+	external AbstractMesh? get originMesh;
+	external set originMesh(AbstractMesh? value);
 	
 	/// The ray that was used to perform the picking.
-	external Ray get ray;
-	external set ray(Ray value);
+	external Ray? get ray;
+	external set ray(Ray? value);
 	
 	/// Gets the normal correspodning to the face the pick collided with
 	/// @param useWorldCoordinates If the resulting normal should be relative to the world (default: false)
