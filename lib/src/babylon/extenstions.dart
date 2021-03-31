@@ -11,7 +11,7 @@ abstract class _UBOTempBuffers {
         if(!buffers.containsKey(length)) {
             buffers[length] = new Float32List(length);
         }
-        return buffers[length];
+        return buffers[length]!;
     }
 }
 
@@ -26,7 +26,7 @@ extension UniformBufferTypes on UniformBuffer {
 
     void updateFloatArray(String name, List<double> array) {
         if (this.useUbo) {
-            final List<double> tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
+            final Float32List tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
             for (int i=0; i<array.length; i++) {
                 tempBuffer[i*4] = array[i];
             }
@@ -34,25 +34,25 @@ extension UniformBufferTypes on UniformBuffer {
         } else {
             final dynamic e = JSU.getProperty(this, "_currentEffect");
             final Effect effect = e;
-            effect.setFloatArray(name, array);
+            effect.setFloatArray(name, array as Float32List);
         }
     }
 
     void updateVector2Array(String name, List<Vector2> array) {
         if (this.useUbo) {
-            final List<double> tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
+            final Float32List tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
             for (int i=0; i<array.length; i++) {
-                tempBuffer[i*4] = array[i].x;
-                tempBuffer[i*4+1] = array[i].y;
+                tempBuffer[i*4] = array[i].x.toDouble();
+                tempBuffer[i*4+1] = array[i].y.toDouble();
             }
             this.updateUniform(name, tempBuffer, tempBuffer.length);
         } else {
             final dynamic e = JSU.getProperty(this, "_currentEffect");
             final Effect effect = e;
-            final List<double> tempBuffer = _UBOTempBuffers.getBuffer(array.length*2);
+            final Float32List tempBuffer = _UBOTempBuffers.getBuffer(array.length*2);
             for (int i=0; i<array.length; i++) {
-                tempBuffer[i*2] = array[i].x;
-                tempBuffer[i*2+1] = array[i].y;
+                tempBuffer[i*2] = array[i].x.toDouble();
+                tempBuffer[i*2+1] = array[i].y.toDouble();
             }
             effect.setFloatArray2(name, tempBuffer);
         }
@@ -60,21 +60,21 @@ extension UniformBufferTypes on UniformBuffer {
 
     void updateVector3Array(String name, List<Vector3> array) {
         if (this.useUbo) {
-            final List<double> tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
+            final Float32List tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
             for (int i=0; i<array.length; i++) {
-                tempBuffer[i*4] = array[i].x;
-                tempBuffer[i*4+1] = array[i].y;
-                tempBuffer[i*4+2] = array[i].z;
+                tempBuffer[i*4] = array[i].x.toDouble();
+                tempBuffer[i*4+1] = array[i].y.toDouble();
+                tempBuffer[i*4+2] = array[i].z.toDouble();
             }
             this.updateUniform(name, tempBuffer, tempBuffer.length);
         } else {
             final dynamic e = JSU.getProperty(this, "_currentEffect");
             final Effect effect = e;
-            final List<double> tempBuffer = _UBOTempBuffers.getBuffer(array.length*3);
+            final Float32List tempBuffer = _UBOTempBuffers.getBuffer(array.length*3);
             for (int i=0; i<array.length; i++) {
-                tempBuffer[i*3] = array[i].x;
-                tempBuffer[i*3+1] = array[i].y;
-                tempBuffer[i*3+2] = array[i].z;
+                tempBuffer[i*3] = array[i].x.toDouble();
+                tempBuffer[i*3+1] = array[i].y.toDouble();
+                tempBuffer[i*3+2] = array[i].z.toDouble();
             }
             effect.setFloatArray3(name, tempBuffer);
         }
@@ -82,21 +82,21 @@ extension UniformBufferTypes on UniformBuffer {
 
     void updateColor3Array(String name, List<Color3> array) {
         if (this.useUbo) {
-            final List<double> tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
+            final Float32List tempBuffer = _UBOTempBuffers.getBuffer(array.length*4);
             for (int i=0; i<array.length; i++) {
-                tempBuffer[i*4] = array[i].r;
-                tempBuffer[i*4+1] = array[i].g;
-                tempBuffer[i*4+2] = array[i].b;
+                tempBuffer[i*4] = array[i].r.toDouble();
+                tempBuffer[i*4+1] = array[i].g.toDouble();
+                tempBuffer[i*4+2] = array[i].b.toDouble();
             }
             this.updateUniform(name, tempBuffer, tempBuffer.length);
         } else {
             final dynamic e = JSU.getProperty(this, "_currentEffect");
             final Effect effect = e;
-            final List<double> tempBuffer = _UBOTempBuffers.getBuffer(array.length*3);
+            final Float32List tempBuffer = _UBOTempBuffers.getBuffer(array.length*3);
             for (int i=0; i<array.length; i++) {
-                tempBuffer[i*3] = array[i].r;
-                tempBuffer[i*3+1] = array[i].g;
-                tempBuffer[i*3+2] = array[i].b;
+                tempBuffer[i*3] = array[i].r.toDouble();
+                tempBuffer[i*3+1] = array[i].g.toDouble();
+                tempBuffer[i*3+2] = array[i].b.toDouble();
             }
             effect.setFloatArray3(name, tempBuffer);
         }

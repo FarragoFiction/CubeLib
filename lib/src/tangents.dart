@@ -4,10 +4,10 @@ import "../CubeLib.dart";
 
 abstract class TangentBuilder {
     static void computeTangents(Mesh mesh) {
-        final List<dynamic> index = mesh.getIndices();
-        final List<dynamic> positions = mesh.getVerticesData(VertexBuffer.PositionKind);
-        final List<dynamic> normals = mesh.getVerticesData(VertexBuffer.NormalKind);
-        final List<dynamic> uvs = mesh.getVerticesData(VertexBuffer.UVKind);
+        final List<dynamic>? index = mesh.getIndices();
+        final List<dynamic>? positions = mesh.getVerticesData(VertexBuffer.PositionKind);
+        final List<dynamic>? normals = mesh.getVerticesData(VertexBuffer.NormalKind);
+        final List<dynamic>? uvs = mesh.getVerticesData(VertexBuffer.UVKind);
 
         if (index == null || positions == null || normals == null || uvs == null) {
             throw ArgumentError("Tangent computation failed, mesh is missing a required buffer");
@@ -15,7 +15,7 @@ abstract class TangentBuilder {
 
         final int nVertices = positions.length ~/ 3;
 
-        List<dynamic> tangents = mesh.getVerticesData(VertexBuffer.TangentKind);
+        List<dynamic>? tangents = mesh.getVerticesData(VertexBuffer.TangentKind);
         tangents ??= new Float32List(4 * nVertices);
 
         final List<Vector3> tan1 = new List<Vector3>.generate(nVertices, (int i) => new Vector3());
@@ -88,7 +88,7 @@ abstract class TangentBuilder {
         final Vector3 n = new Vector3();
         final Vector3 n2 = new Vector3();
         Vector3 t;
-        double w,test;
+        num w,test;
 
         void handleVertex(int v) {
             n.set(normals[v*3], normals[v*3+1], normals[v*3+2]);
@@ -105,7 +105,7 @@ abstract class TangentBuilder {
             test = Vector3.Dot(tmp2, tan2[v]);
             w = test.sign;
 
-            tangents[v*4] = tmp.x;
+            tangents![v*4] = tmp.x;
             tangents[v*4+1] = tmp.y;
             tangents[v*4+2] = tmp.z;
             tangents[v*4+3] = w;

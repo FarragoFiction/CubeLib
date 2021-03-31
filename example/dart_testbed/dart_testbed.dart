@@ -9,7 +9,7 @@ import "package:CubeLib/CubeLib.dart" as B;
 import "package:CubeLib/Formats.dart";
 import "package:LoaderLib/Loader.dart";
 
-Element debugDiv = querySelector("#debugdiv");
+Element debugDiv = querySelector("#debugdiv")!;
 
 Future<void> main() async {
     testRendering();
@@ -17,7 +17,7 @@ Future<void> main() async {
 }
 
 Future<void> testRendering() async {
-    final CanvasElement canvas = querySelector("#canvas");
+    final CanvasElement canvas = querySelector("#canvas")! as CanvasElement;
     final B.Engine engine = new B.Engine(canvas, false,
         //B.EngineOptions(disableWebGL2Support: true)
     );
@@ -45,11 +45,12 @@ Future<void> testRendering() async {
     await B.CubeLibUtils.registerShaderInclude("commonUBO", "shaderIncludes.fx");
 
     const int lightCount = 100;
-    final List<B.Vector3> lightPositions = new List<B.Vector3>(lightCount);
-    final List<B.Color3> lightColours = new List<B.Color3>(lightCount);
+
+    final List<B.Vector3> lightPositions = new List<B.Vector3>.filled(lightCount, B.Vector3.Zero()); // dummy fill
+    final List<B.Color3> lightColours = new List<B.Color3>.filled(lightCount, new B.Color3()); // dummy fill
     final List<B.Vector2> lightInfo = new List<B.Vector2>.generate(lightCount, (int i) => new B.Vector2());
 
-    final B.UniformBuffer ubo = new B.UniformBuffer(engine, null, true)
+    final B.UniformBuffer ubo = new B.UniformBuffer(engine, <num>[], true)
         ..addVector3("cameraPos", camera.position)
         ..addFloat2("cameraDepth", camera.minZ, camera.maxZ)
         ..addVector3("lightDirection", B.Vector3(0.1,1.0,0.3))//light1.direction)
@@ -116,7 +117,7 @@ Future<void> testRendering() async {
     ;
     B.TangentBuilder.computeTangents(object);
 
-    B.Mesh testSphere = B.MeshBuilder.CreateSphere("testSphere", B.MeshBuilderCreateSphereOptions(diameter:4), scene)
+    final B.Mesh testSphere = B.MeshBuilder.CreateSphere("testSphere", B.MeshBuilderCreateSphereOptions(diameter:4), scene)
         ..material = material
         ..position.set(5, 0, 0);
     B.TangentBuilder.computeTangents(testSphere);
@@ -206,7 +207,7 @@ Future<void> testRendering() async {
         int b = 0;
         B.Vector3 pos;
         for (final B.Light iLight in scene.lights) {
-            final B.ShadowLight uLight = iLight;
+            final B.ShadowLight uLight = iLight as B.ShadowLight;
             if (uLight.getClassName() != "PointLight") {
                 continue;
             }
@@ -262,7 +263,7 @@ Future<void> testRendering() async {
         scene.render();
     }));
 
-    document.body.append(new DivElement()..append(new ButtonElement()..text="show inspector"..onClick.listen((MouseEvent e) { scene.debugLayer.show(); })));
+    document.body!.append(new DivElement()..append(new ButtonElement()..text="show inspector"..onClick.listen((MouseEvent e) { scene.debugLayer.show(); })));
 }
 
 String printMatrix(B.Matrix m) {
@@ -290,5 +291,5 @@ Future<void> testPngCodec() async {
 
     ctx.putImageData(iData, 0, 0);
 
-    document.body.append(canvas);
+    document.body!.append(canvas);
 }
