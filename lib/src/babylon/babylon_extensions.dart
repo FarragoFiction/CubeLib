@@ -17,15 +17,3 @@ class ShaderMaterialShaderPath {
         String vertexSource, String fragmentSource
     });
 }
-
-@JS()
-class ShaderMaterialWithAlphaTestTexture extends ShaderMaterial {
-    external factory ShaderMaterialWithAlphaTestTexture(String name, Scene scene, dynamic shaderPath, [IShaderMaterialOptions options, Texture alphaTexture]);
-}
-
-@JS()
-class Vector2WithCallback extends Vector2 {
-    external factory Vector2WithCallback(num x, num y);
-
-    external void extension_setCallback(void Function(Vector2)? callback);
-}

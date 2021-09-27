@@ -28,7 +28,7 @@ Future<void> testRendering() async {
     camera
         //..minZ = 2.0
         ..maxZ = 500.0
-        ..attachControl(canvas, true);
+        ..attachControl(true);
 
     final B.Texture depth = scene.enableDepthRenderer(camera, false).getDepthMap();
     //scene.enableGeometryBufferRenderer()..enablePosition = true..;
@@ -153,7 +153,7 @@ Future<void> testRendering() async {
                     );
                     //object.createInstance("test");
                 } else {
-                    objects.add(object.clone("i_${x}_${y}_$z")
+                    objects.add(object.clone("i_${x}_${y}_$z")!
                         ..position.set(spacing * x, spacing * y, spacing * z)
                         ..rotation.set(rand.nextDouble() * Math.pi * 2, rand.nextDouble() * Math.pi * 2, 0)
                     );
@@ -168,7 +168,7 @@ Future<void> testRendering() async {
             }
         }
     }
-    object = B.Mesh.MergeMeshes(objects)
+    object = B.Mesh.MergeMeshes(objects)!
         ..alwaysSelectAsActiveMesh = true
         ..doNotSyncBoundingInfo = true
         ..freezeWorldMatrix()
@@ -224,7 +224,7 @@ Future<void> testRendering() async {
                 break;
             }
         }
-        ubo.bindToEffect(material.getEffect(), "CommonUBO");
+        ubo.bindToEffect(material.getEffect()!, "CommonUBO");
         ubo
             ..updateVector3("cameraPos", camera.position)
             ..updateVector3Array("lightPositions", lightPositions)
@@ -267,10 +267,10 @@ Future<void> testRendering() async {
 }
 
 String printMatrix(B.Matrix m) {
-    B.Vector4 r0 = m.getRow(0);
-    B.Vector4 r1 = m.getRow(1);
-    B.Vector4 r2 = m.getRow(2);
-    B.Vector4 r3 = m.getRow(3);
+    B.Vector4 r0 = m.getRow(0)!;
+    B.Vector4 r1 = m.getRow(1)!;
+    B.Vector4 r2 = m.getRow(2)!;
+    B.Vector4 r3 = m.getRow(3)!;
     return "[${r0.x}, ${r0.y}, ${r0.z}, ${r0.w}] [${r1.x}, ${r1.y}, ${r1.z}, ${r1.w}] [${r2.x}, ${r2.y}, ${r2.z}, ${r2.w}] [${r3.x}, ${r3.y}, ${r3.z}, ${r3.w}]";
 }
 
